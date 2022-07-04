@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">Simple Manager</string>
+    <string name="rename">Переименовать</string>
+    <string name="edit">Редактировать</string>
+    <string name="delete">Удалить</string>
+    <string name="move">Переместить</string>
+    <string name="back">Назад</string>
 </resources>

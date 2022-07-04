@@ -21,17 +21,17 @@ import kotlinx.coroutines.launch
  * @param content content of Swapper.
  */
 @Composable
-fun Swapper(
+fun <T>Swapper(
     modifier: Modifier = Modifier,
-    key: Int = 0,
+    key: T,
     isContinues: Boolean = false,
     delay: Long = 0L,
     enter: EnterTransition = slideInVertically() + fadeIn(),
     exit: ExitTransition = slideOutVertically() + fadeOut(),
-    content: @Composable (key: Int) -> Unit = {}
+    content: @Composable (key: T) -> Unit = {}
 ) {
     // buffer to hold content keys
-    val keyBuffer = remember { mutableListOf(0, 1) }
+    val keyBuffer = remember { mutableListOf<T>(key, key) }
 
     // indices to swap buffer values
     val i = remember { mutableListOf(0, 1) }

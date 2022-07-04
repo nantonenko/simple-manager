@@ -1,4 +1,4 @@
-package com.hfad.simplemanager.ui.theme.elements
+package com.hfad.simplemanager.ui.components
 
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -6,7 +6,7 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
-import androidx.compose.material.Button
+import androidx.compose.material.MaterialTheme.colors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.hfad.simplemanager.ui.theme.*
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun TransparentButton(
     onClick: () -> Unit,
@@ -28,21 +29,21 @@ fun TransparentButton(
     border: BorderStroke? = null,
     color: Color = theme.colors.surface.copy(alpha = 0.0f),
     contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
+    enabled: Boolean = true,
+    contentArrangement: Arrangement.Horizontal = Arrangement.Center,
     content: @Composable RowScope.() -> Unit
 ) {
     val contentColor = contentColorFor(backgroundColor = color)
     Surface(
-        modifier = modifier
-            .clickable(onClick = onClick)
-            .indication(
-                interactionSource,
-                LocalIndication.current
-            ),
+        onClick = onClick,
+        modifier = modifier.defaultMinSize(48.dp, 48.dp),
+        enabled = enabled,
         shape = shape,
         color = color,
-        contentColor = contentColor,
+        contentColor = contentColor.copy(alpha = 1f),
         border = border,
-        elevation = elevation
+        elevation = elevation,
+        interactionSource = interactionSource,
     ) {
         CompositionLocalProvider(LocalContentAlpha provides contentColor.alpha) {
             ProvideTextStyle(
@@ -55,7 +56,7 @@ fun TransparentButton(
                             minHeight = ButtonDefaults.MinHeight
                         )
                         .padding(contentPadding),
-                    horizontalArrangement = Arrangement.Center,
+                    horizontalArrangement = contentArrangement,
                     verticalAlignment = Alignment.CenterVertically,
                     content = content
                 )
