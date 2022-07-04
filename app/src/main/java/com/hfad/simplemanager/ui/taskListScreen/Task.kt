@@ -1,5 +1,6 @@
 package com.hfad.simplemanager.ui.taskListScreen
 
+import android.util.EventLogTags
 import androidx.compose.animation.*
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.TargetBasedAnimation
@@ -14,12 +15,14 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.PointMode.Companion.Points
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -68,6 +71,7 @@ fun Task(
                 State.MAIN -> MainState(
                     state = state,
                     onOpenMenu = { taskState = State.MENU },
+                    onEdit = { taskState = State.MENU },
                     onEditPoints = { taskState = State.POINTS_EDIT }
                 )
                 State.MENU -> MenuState(
@@ -87,19 +91,28 @@ fun Task(
 }
 
 @Composable
-private fun MainState(state: TaskState, onOpenMenu: () -> Unit = {}, onEditPoints: () -> Unit = {}) {
+private fun MainState(state: TaskState, onOpenMenu: () -> Unit = {}, onEdit: () -> Unit, onEditPoints: () -> Unit = {}) {
     Column(
         modifier = Modifier
             .padding(horizontal = theme.spacing.corner, vertical = theme.spacing.medium)
             .fillMaxWidth()
     ) {
+        Text(
+            text = state.title,
+            style = theme.typography.h6
+        )
+        Divider()
+
+        Spacer(modifier = Modifier.height(theme.spacing.medium))
+
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            Text(modifier = Modifier.weight(1f), text = state.title, style = theme.typography.h5)
 
-            Spacer(modifier = Modifier.width(theme.spacing.medium))
+            IconButton(onClick = {}) {
+                Icon(Icons.Default.Edit, null)
+            }
 
             OutlinedTransparentButton(
                 modifier = Modifier.align(Alignment.CenterVertically),
@@ -108,6 +121,7 @@ private fun MainState(state: TaskState, onOpenMenu: () -> Unit = {}, onEditPoint
                 Text(state.points.toString(), style = theme.typography.h5)
             }
         }
+        Spacer(modifier = Modifier.height(theme.spacing.medium))
         Divider()
         Spacer(modifier = Modifier.height(theme.spacing.large))
         Description(text = state.description)
@@ -118,9 +132,10 @@ private fun MainState(state: TaskState, onOpenMenu: () -> Unit = {}, onEditPoint
 private fun Back(modifier: Modifier = Modifier, onClick: () -> Unit) {
     val backStyle = theme.typography.h6.copy(color = theme.typography.h6.color.copy(alpha = 0.6f))
     TransparentButton(modifier = modifier, onClick = onClick) {
-        Icon(Icons.Default.ArrowBack,  null, tint = backStyle.color)
-        Spacer(modifier = Modifier.width(theme.spacing.medium))
-        Text(stringResource(R.string.back), style = backStyle)
+        Box(modifier = Modifier.fillMaxWidth()) {
+            Icon(Icons.Default.ArrowBack, null, tint = backStyle.color, modifier = Modifier.align(Alignment.CenterStart))
+            Text(stringResource(R.string.back), style = backStyle, modifier = Modifier.align(Alignment.Center))
+        }
     }
 }
 
@@ -134,29 +149,33 @@ private fun MenuState(
 ) {
     val btnMod = Modifier.fillMaxWidth()
     val btnStyle = theme.typography.h6
-    val backStyle = btnStyle.copy(color = btnStyle.color.copy(alpha = 0.6f))
     val deleteStyle = btnStyle.copy(color = theme.colors.error)
     Column(
         modifier = Modifier.padding(horizontal = theme.spacing.corner, vertical = theme.spacing.medium)
     ) {
-        Back(onClick = onBack)
+        Back(modifier = Modifier.align(Alignment.CenterHorizontally), onClick = onBack)
         Divider()
         Spacer(modifier = Modifier.height(theme.spacing.small))
+
         TransparentButton(modifier = btnMod, onClick = onRename) {
             Text(stringResource(R.string.rename), style = btnStyle)
         }
+
         TransparentButton(modifier = btnMod, onClick = onEdit) {
             Text(stringResource(R.string.edit), style = btnStyle)
         }
+
         TransparentButton(modifier = btnMod, onClick = onMove) {
             Text(stringResource(R.string.move), style = btnStyle)
         }
         Divider()
         Spacer(modifier = Modifier.height(theme.spacing.small))
+
         TransparentButton(modifier = btnMod, onClick = onDelete) {
-            Icon(Icons.Default.Delete,  null, tint = deleteStyle.color)
-            Spacer(modifier = Modifier.width(theme.spacing.medium))
-            Text(stringResource(R.string.delete), style = deleteStyle)
+            Box(modifier = Modifier.fillMaxWidth()) {
+                Icon(Icons.Default.Delete, null, tint = deleteStyle.color, modifier = Modifier.align(Alignment.CenterStart))
+                Text(stringResource(R.string.delete), style = deleteStyle, modifier = Modifier.align(Alignment.Center))
+            }
         }
     }
 }
@@ -226,7 +245,7 @@ private fun PreviewTask() {
     val s by remember {
         mutableStateOf(
             TaskState(
-                title = "very long and interesting name",
+                title = "Make card with product description and so on and so on",
                 description = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem" +
                         " Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown" +
                         " printer took a galley of type and scrambled it to make a type specimen book. It has survived " +
@@ -234,7 +253,7 @@ private fun PreviewTask() {
                         "unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem " +
                         "Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including " +
                         "versions of Lorem Ipsum.",
-                points = 10000
+                points = 1
             )
         )
     }
