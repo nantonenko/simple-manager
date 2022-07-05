@@ -8,4 +8,11 @@
     <string name="points">Очки</string>
     <string name="apply">Применить</string>
     <string name="cancel">Отменить</string>
+    <string name="new_header">Новый заголовок</string>
+    <string name="yes">Да</string>
+    <string name="No">Нет</string>
+    <string name="are_you_sure">Вы Уверены ?</string>
+    <string name="header">Заголовок</string>
+    <string name="description">Описание</string>
+    <string name="edit_points">Редактировать очки</string>
 </resources>
