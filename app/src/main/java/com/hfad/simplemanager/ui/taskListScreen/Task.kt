@@ -1,41 +1,28 @@
 package com.hfad.simplemanager.ui.taskListScreen
 
-import android.util.EventLogTags
 import androidx.compose.animation.*
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.TargetBasedAnimation
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.PointMode.Companion.Points
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.hfad.simplemanager.R
-import com.hfad.simplemanager.ui.components.OutlinedTransparentButton
-import com.hfad.simplemanager.ui.components.Swapper
-import com.hfad.simplemanager.ui.components.TransparentButton
+import com.hfad.simplemanager.ui.components.*
 import com.hfad.simplemanager.ui.theme.elevation
 import com.hfad.simplemanager.ui.theme.round
 import com.hfad.simplemanager.ui.theme.spacing
 import com.hfad.simplemanager.ui.theme.theme
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 data class TaskState(
     val id: Int = 0,
@@ -48,7 +35,18 @@ data class TaskState(
 
 private const val MAX_DESCRIPTION_LINES = 5 // characters
 
-private enum class State { MAIN, MENU, RENAME, MOVE_MENU, POINTS_EDIT, DELETE_CONFIRMATION }
+private enum class State { MAIN, MENU, RENAME, MOVE_MENU, POINTS_EDIT, EDIT, DELETE_CONFIRMATION }
+
+/**
+ * Navigation
+ * [Task] main composable
+ * [BackButton] back button for different menues
+ * [MenuState] menu state of task card
+ * [Description] container for description
+ * [DescriptionFull] fully opened description with all text visible
+ * [DescriptionPartial] description with [MAX_DESCRIPTION_LINES] visible
+ * [PointsEditMenuState] menu for changing amount of points in task
+ */
 
 @Composable
 fun Task(
@@ -56,6 +54,15 @@ fun Task(
     state: TaskState = TaskState()
 ) {
     var taskState by remember { mutableStateOf(State.MAIN) }
+
+    fun back() { taskState = State.MAIN }
+    fun rename() { taskState = State.RENAME }
+    fun edit() { taskState = State.EDIT }
+    fun move() { taskState = State.MOVE_MENU }
+    fun delete() { taskState = State.DELETE_CONFIRMATION }
+    fun editPoints() { taskState = State.POINTS_EDIT }
+    fun menu() { taskState = State.MENU }
+
     Card(
         modifier = modifier.animateContentSize(),
         shape = theme.shapes.round,
@@ -64,26 +71,33 @@ fun Task(
     ) {
         Swapper(
             key = taskState,
+            isContinues = true,
             enter = slideInHorizontally { it },
             exit = slideOutHorizontally { -it }
         ) { ts ->
             when (ts) {
                 State.MAIN -> MainState(
                     state = state,
-                    onOpenMenu = { taskState = State.MENU },
-                    onEdit = { taskState = State.MENU },
-                    onEditPoints = { taskState = State.POINTS_EDIT }
+                    onOpenMenu = ::menu,
+                    onEdit = ::edit,
+                    onEditPoints = ::editPoints
                 )
                 State.MENU -> MenuState(
-                    onBack = { taskState = State.MAIN },
-                    onRename = { taskState = State.RENAME },
-                    onEdit = {},
-                    onMove = { taskState = State.MOVE_MENU },
-                    onDelete = { taskState = State.DELETE_CONFIRMATION }
+                    onBack = ::back,
+                    onRename = ::rename,
+                    onEdit = ::edit,
+                    onMove = ::move,
+                    onDelete = ::delete
                 )
                 State.RENAME -> {}
                 State.MOVE_MENU -> {}
-                State.POINTS_EDIT -> {}
+                State.POINTS_EDIT -> PointsEditMenuState(
+                    points = state.points,
+                    onBack = ::back,
+                    onConfirm = { _ -> back() },
+                    onCancel = ::back,
+                )
+                State.EDIT -> {}
                 State.DELETE_CONFIRMATION -> {}
             }
         }
@@ -126,64 +140,6 @@ private fun MainState(state: TaskState, onOpenMenu: () -> Unit = {}, onEdit: () 
         Spacer(modifier = Modifier.height(theme.spacing.large))
         Description(text = state.description)
     }
-}
-
-@Composable
-private fun Back(modifier: Modifier = Modifier, onClick: () -> Unit) {
-    val backStyle = theme.typography.h6.copy(color = theme.typography.h6.color.copy(alpha = 0.6f))
-    TransparentButton(modifier = modifier, onClick = onClick) {
-        Box(modifier = Modifier.fillMaxWidth()) {
-            Icon(Icons.Default.ArrowBack, null, tint = backStyle.color, modifier = Modifier.align(Alignment.CenterStart))
-            Text(stringResource(R.string.back), style = backStyle, modifier = Modifier.align(Alignment.Center))
-        }
-    }
-}
-
-@Composable
-private fun MenuState(
-    onBack: () -> Unit = {},
-    onRename: () -> Unit = {},
-    onEdit: () -> Unit = {},
-    onMove: () -> Unit = {},
-    onDelete: () -> Unit = {}
-) {
-    val btnMod = Modifier.fillMaxWidth()
-    val btnStyle = theme.typography.h6
-    val deleteStyle = btnStyle.copy(color = theme.colors.error)
-    Column(
-        modifier = Modifier.padding(horizontal = theme.spacing.corner, vertical = theme.spacing.medium)
-    ) {
-        Back(modifier = Modifier.align(Alignment.CenterHorizontally), onClick = onBack)
-        Divider()
-        Spacer(modifier = Modifier.height(theme.spacing.small))
-
-        TransparentButton(modifier = btnMod, onClick = onRename) {
-            Text(stringResource(R.string.rename), style = btnStyle)
-        }
-
-        TransparentButton(modifier = btnMod, onClick = onEdit) {
-            Text(stringResource(R.string.edit), style = btnStyle)
-        }
-
-        TransparentButton(modifier = btnMod, onClick = onMove) {
-            Text(stringResource(R.string.move), style = btnStyle)
-        }
-        Divider()
-        Spacer(modifier = Modifier.height(theme.spacing.small))
-
-        TransparentButton(modifier = btnMod, onClick = onDelete) {
-            Box(modifier = Modifier.fillMaxWidth()) {
-                Icon(Icons.Default.Delete, null, tint = deleteStyle.color, modifier = Modifier.align(Alignment.CenterStart))
-                Text(stringResource(R.string.delete), style = deleteStyle, modifier = Modifier.align(Alignment.Center))
-            }
-        }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewMenuState() {
-    MenuState()
 }
 
 @Composable
@@ -239,6 +195,88 @@ private fun DescriptionFull(text: String, onClose: () -> Unit) = Text(
     }
 )
 
+@Composable
+private fun MenuState(
+    onBack: () -> Unit = {},
+    onRename: () -> Unit = {},
+    onEdit: () -> Unit = {},
+    onMove: () -> Unit = {},
+    onDelete: () -> Unit = {}
+) {
+    val btnMod = Modifier.fillMaxWidth()
+    val btnStyle = theme.typography.h6
+    val deleteStyle = btnStyle.copy(color = theme.colors.error)
+    Column(
+        modifier = Modifier.padding(horizontal = theme.spacing.corner, vertical = theme.spacing.medium)
+    ) {
+        BackButton(modifier = Modifier.align(Alignment.CenterHorizontally), onClick = onBack)
+        Divider()
+        Spacer(modifier = Modifier.height(theme.spacing.small))
+
+        TransparentButton(modifier = btnMod, onClick = onRename) {
+            Text(stringResource(R.string.rename), style = btnStyle)
+        }
+
+        TransparentButton(modifier = btnMod, onClick = onEdit) {
+            Text(stringResource(R.string.edit), style = btnStyle)
+        }
+
+        TransparentButton(modifier = btnMod, onClick = onMove) {
+            Text(stringResource(R.string.move), style = btnStyle)
+        }
+        Divider()
+        Spacer(modifier = Modifier.height(theme.spacing.small))
+
+        LeadingIconButton(
+            onClick = onDelete,
+            icon = { Icon(Icons.Default.Delete, null, tint = deleteStyle.color) },
+            text = { Text(stringResource(R.string.delete), style = deleteStyle) }
+        )
+    }
+}
+
+
+@Composable
+private fun PointsEditMenuState(
+    modifier: Modifier = Modifier,
+    points: Int,
+    onBack: () -> Unit = {},
+    onConfirm: (Int) -> Unit = {},
+    onCancel: () -> Unit = {}
+) {
+    val btnStyle = theme.typography.h6
+    var innerPoints by remember { mutableStateOf(points.toString()) }
+
+    Column(modifier = modifier) {
+        BackButton(modifier = Modifier.align(Alignment.CenterHorizontally), onClick = onBack)
+        Divider()
+        Spacer(modifier = Modifier.height(theme.spacing.small))
+
+        TextField(
+            modifier = Modifier.fillMaxWidth(),
+            value = innerPoints,
+            label = { Text(stringResource(R.string.points)) },
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            onValueChange = { s ->
+                innerPoints = if (s.isBlank() || s.toIntOrNull() == null) "" else s
+            }
+        )
+
+        LeadingIconButton(
+            onClick = { onConfirm(innerPoints.toInt()) },
+            icon = { Icon(Icons.Default.Done, null) },
+            text = { Text(stringResource(R.string.apply), style = btnStyle) }
+        )
+
+        LeadingIconButton(
+            onClick = onCancel,
+            icon = { Icon(Icons.Default.Close, null, tint = theme.colors.error) },
+            text = { Text(stringResource(R.string.cancel), style = btnStyle.copy(color = theme.colors.error)) }
+        )
+    }
+}
+
 @Preview(showBackground = true)
 @Composable
 private fun PreviewTask() {
@@ -253,7 +291,7 @@ private fun PreviewTask() {
                         "unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem " +
                         "Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including " +
                         "versions of Lorem Ipsum.",
-                points = 1
+                points = 1000
             )
         )
     }
@@ -266,4 +304,17 @@ private fun PreviewTask() {
             state = s
         )
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewMenuState() {
+    MenuState()
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewPointsEditMenuState() {
+    var p by remember { mutableStateOf(0) }
+    PointsEditMenuState(points = p)
 }

@@ -5,4 +5,7 @@
     <string name="delete">Удалить</string>
     <string name="move">Переместить</string>
     <string name="back">Назад</string>
+    <string name="points">Очки</string>
+    <string name="apply">Применить</string>
+    <string name="cancel">Отменить</string>
 </resources>
