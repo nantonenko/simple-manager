@@ -1,9 +1,6 @@
 package com.hfad.simplemanager.ui.components
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
@@ -32,7 +29,7 @@ fun DeleteConfirmation(
 
     Column(modifier = modifier) {
         Text(
-            modifier = Modifier.align(Alignment.CenterHorizontally),
+            modifier = Modifier.padding(vertical = theme.spacing.medium).align(Alignment.CenterHorizontally),
             text = stringResource(R.string.are_you_sure),
             style = theme.typography.h5
         )

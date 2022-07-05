@@ -3,8 +3,8 @@ package com.hfad.simplemanager.ui.taskListScreen
 import androidx.compose.animation.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -34,7 +34,7 @@ data class TaskState(
 
 private const val MAX_DESCRIPTION_LINES = 5 // characters
 
-private enum class State { MAIN, MENU, RENAME, MOVE_MENU, POINTS_EDIT, EDIT, DELETE_CONFIRMATION }
+private enum class TState { MAIN, MENU, RENAME, MOVE_MENU, POINTS_EDIT, EDIT, DELETE_CONFIRMATION }
 
 /**
  * Navigation
@@ -53,40 +53,40 @@ fun Task(
     state: TaskState = TaskState(),
     handle: (TaskEvents) -> Unit = {}
 ) {
-    var taskState by remember { mutableStateOf(State.MAIN) }
+    var taskState by remember { mutableStateOf(TState.MAIN) }
 
     fun back() {
-        taskState = State.MAIN
+        taskState = TState.MAIN
     }
 
     fun rename() {
-        taskState = State.RENAME
+        taskState = TState.RENAME
     }
 
     fun edit() {
-        taskState = State.EDIT
+        taskState = TState.EDIT
     }
 
     fun move() {
-        taskState = State.MOVE_MENU
+        taskState = TState.MOVE_MENU
     }
 
     fun delete() {
-        taskState = State.DELETE_CONFIRMATION
+        taskState = TState.DELETE_CONFIRMATION
     }
 
     fun editPoints() {
-        taskState = State.POINTS_EDIT
+        taskState = TState.POINTS_EDIT
     }
 
     fun menu() {
-        taskState = State.MENU
+        taskState = TState.MENU
     }
 
     Card(
         modifier = modifier.animateContentSize(),
         shape = theme.shapes.round,
-        elevation = theme.elevation.small,
+        elevation = if (isSystemInDarkTheme()) theme.elevation.large else theme.elevation.small,
         border = BorderStroke(width = 2.dp, color = theme.colors.onSurface.copy(alpha = 0.25f))
     ) {
         Swapper(
@@ -95,7 +95,7 @@ fun Task(
             enter = slideInHorizontally { it },
             exit = slideOutHorizontally { -it }) { ts ->
             when (ts) {
-                State.MAIN -> {
+                TState.MAIN -> {
                     MainState(
                         state = state,
                         onOpenMenu = ::menu,
@@ -104,7 +104,7 @@ fun Task(
                         onEditPoints = ::editPoints
                     )
                 }
-                State.MENU -> {
+                TState.MENU -> {
                     MenuState(
                         onBack = ::back,
                         onRename = ::rename,
@@ -114,7 +114,7 @@ fun Task(
                         onDelete = ::delete
                     )
                 }
-                State.RENAME -> {
+                TState.RENAME -> {
                     ChangeValueMenu(
                         value = state.title,
                         label = { Text(stringResource(R.string.new_header)) },
@@ -125,8 +125,8 @@ fun Task(
                         onCancel = ::back
                     )
                 }
-                State.MOVE_MENU -> {}
-                State.POINTS_EDIT -> {
+                TState.MOVE_MENU -> {}
+                TState.POINTS_EDIT -> {
                     ChangeValueMenu(
                         value = state.points.toString(),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -143,7 +143,7 @@ fun Task(
                         onCancel = ::back,
                     )
                 }
-                State.EDIT -> {
+                TState.EDIT -> {
                     EditMenuState(state = state, onConfirm = { nn, nd, np ->
                         handle(
                             TaskEvents.Edit(
@@ -156,7 +156,7 @@ fun Task(
                         back()
                     }, onCancel = ::back)
                 }
-                State.DELETE_CONFIRMATION -> {
+                TState.DELETE_CONFIRMATION -> {
                     DeleteConfirmation(
                         onConfirm = {
                             handle(TaskEvents.Delete(state.id))
@@ -317,43 +317,35 @@ private fun EditMenuState(
 
     val fm = Modifier.fillMaxWidth()
 
-    LazyColumn(
+    Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(theme.spacing.large)
     ) {
-        item {
-            TextField(
-                modifier = fm,
-                value = title,
-                onValueChange = { title = it },
-                singleLine = true,
-                label = { Text(stringResource(R.string.header)) })
-        }
+        TextField(
+            modifier = fm,
+            value = title,
+            onValueChange = { title = it },
+            singleLine = true,
+            label = { Text(stringResource(R.string.header)) })
 
-        item {
-            TextField(
-                modifier = fm,
-                value = points,
-                onValueChange = { points = it },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                label = { Text(stringResource(id = R.string.points)) })
-        }
+        TextField(
+            modifier = fm,
+            value = points,
+            onValueChange = { points = it },
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            label = { Text(stringResource(id = R.string.points)) })
 
-        item {
-            TextField(
-                modifier = fm,
-                value = description,
-                onValueChange = { description = it },
-                label = { Text(stringResource(R.string.description)) })
-        }
+        TextField(
+            modifier = fm,
+            value = description,
+            onValueChange = { description = it },
+            label = { Text(stringResource(R.string.description)) })
 
-        item {
-            ConfirmCancelButtons(
-                onConfirm = { onConfirm(title, description, points) },
-                onCancel = onCancel
-            )
-        }
+        ConfirmCancelButtons(
+            onConfirm = { onConfirm(title, description, points) },
+            onCancel = onCancel
+        )
     }
 }
 
