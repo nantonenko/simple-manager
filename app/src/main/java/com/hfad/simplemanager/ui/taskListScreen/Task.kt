@@ -44,7 +44,7 @@ private enum class TState { MAIN, MENU, RENAME, MOVE_MENU, POINTS_EDIT, EDIT, DE
  * [Description] container for description
  * [DescriptionFull] fully opened description with all text visible
  * [DescriptionPartial] description with [MAX_DESCRIPTION_LINES] visible
- * [EditMenuState] task editing menu
+ * [TaskEditMenu] task editing menu
  */
 
 @Composable
@@ -144,7 +144,7 @@ fun Task(
                     )
                 }
                 TState.EDIT -> {
-                    EditMenuState(state = state, onConfirm = { nn, nd, np ->
+                    TaskEditMenu(state = state, onConfirm = { nn, nd, np ->
                         handle(
                             TaskEvents.Edit(
                                 id = state.id,
@@ -304,51 +304,6 @@ private fun MenuState(
     }
 }
 
-@Composable
-private fun EditMenuState(
-    modifier: Modifier = Modifier,
-    state: TaskState = TaskState(),
-    onConfirm: (title: String, description: String, points: String) -> Unit = { _, _, _ -> },
-    onCancel: () -> Unit = {}
-) {
-    var title by remember { mutableStateOf(state.title) }
-    var description by remember { mutableStateOf(state.description) }
-    var points by remember { mutableStateOf(state.points.toString()) }
-
-    val fm = Modifier.fillMaxWidth()
-
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(theme.spacing.large)
-    ) {
-        TextField(
-            modifier = fm,
-            value = title,
-            onValueChange = { title = it },
-            singleLine = true,
-            label = { Text(stringResource(R.string.header)) })
-
-        TextField(
-            modifier = fm,
-            value = points,
-            onValueChange = { points = it },
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            label = { Text(stringResource(id = R.string.points)) })
-
-        TextField(
-            modifier = fm,
-            value = description,
-            onValueChange = { description = it },
-            label = { Text(stringResource(R.string.description)) })
-
-        ConfirmCancelButtons(
-            onConfirm = { onConfirm(title, description, points) },
-            onCancel = onCancel
-        )
-    }
-}
-
 @Preview(showBackground = true)
 @Composable
 private fun PreviewTask() {
@@ -380,5 +335,5 @@ private fun PreviewMenuState() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewEditMenuState() {
-    EditMenuState()
+    TaskEditMenu()
 }
