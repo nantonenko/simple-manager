@@ -3,12 +3,15 @@ package com.hfad.simplemanager
 import android.app.Application
 import androidx.room.Room
 import com.hfad.simplemanager.dataBase.AppDatabase
-import com.hfad.simplemanager.ui.taskListScreen.TaskScreenVM
+import com.hfad.simplemanager.ui.ProjectsScreen.ProjectScreenVM
+import com.hfad.simplemanager.ui.TaskListScreen.TaskScreenVM
+
+
 
 class SimpleManagerApp : Application() {
     private lateinit var db: AppDatabase
-    private lateinit var repository: Repository
-    private lateinit var taskScreenVM: TaskScreenVM
+    lateinit var taskScreenVM: TaskScreenVM
+    lateinit var projectScreenVM: ProjectScreenVM
 
     override fun onCreate() {
         super.onCreate()
@@ -18,8 +21,11 @@ class SimpleManagerApp : Application() {
             "simple_manager_db"
         ).build()
 
-        repository = Repository(db)
         taskScreenVM = TaskScreenVM()
-        taskScreenVM.repo = repository
+        projectScreenVM = ProjectScreenVM()
+
+        taskScreenVM.taskDao = db.taskDao()
+        taskScreenVM.taskListDao = db.taskListDao()
+        projectScreenVM.prjDao = db.projectDao()
     }
 }

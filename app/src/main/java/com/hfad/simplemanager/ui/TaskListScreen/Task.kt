@@ -1,4 +1,4 @@
-package com.hfad.simplemanager.ui.taskListScreen
+package com.hfad.simplemanager.ui.TaskListScreen
 
 import androidx.compose.animation.*
 import androidx.compose.foundation.BorderStroke

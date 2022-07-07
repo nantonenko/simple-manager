@@ -11,7 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import com.hfad.simplemanager.R
-import com.hfad.simplemanager.ui.taskListScreen.TaskState
+import com.hfad.simplemanager.ui.TaskListScreen.TaskState
 import com.hfad.simplemanager.ui.theme.spacing
 import com.hfad.simplemanager.ui.theme.theme
 
