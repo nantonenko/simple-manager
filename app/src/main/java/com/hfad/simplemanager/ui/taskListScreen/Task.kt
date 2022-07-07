@@ -19,7 +19,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.hfad.simplemanager.R
-import com.hfad.simplemanager.ui.TaskEvents
+import com.hfad.simplemanager.ui.TaskEvent
 import com.hfad.simplemanager.ui.components.*
 import com.hfad.simplemanager.ui.theme.elevation
 import com.hfad.simplemanager.ui.theme.round
@@ -27,9 +27,12 @@ import com.hfad.simplemanager.ui.theme.spacing
 import com.hfad.simplemanager.ui.theme.theme
 
 data class TaskState(
-    val id: Int = 0, val listId: Int = 0, // id of task list to which this task is belong
-    val projectId: Int = 0, // id of project to which this task is belong
-    val title: String = "", val description: String = "", val points: Int = 0
+    val id: Long = 0,
+    val listId: Long = 0, // id of task list to which this task is belong
+    val projectId: Long = 0, // id of project to which this task is belong
+    val title: String = "",
+    val description: String = "",
+    val points: Int = 0
 )
 
 private const val MAX_DESCRIPTION_LINES = 5 // characters
@@ -44,14 +47,15 @@ private enum class TState { MAIN, MENU, RENAME, MOVE_MENU, POINTS_EDIT, EDIT, DE
  * [Description] container for description
  * [DescriptionFull] fully opened description with all text visible
  * [DescriptionPartial] description with [MAX_DESCRIPTION_LINES] visible
- * [TaskEditMenu] task editing menu
+ * [MoveMenu] menu with possible destination task lists
  */
 
 @Composable
 fun Task(
     modifier: Modifier = Modifier,
     state: TaskState = TaskState(),
-    handle: (TaskEvents) -> Unit = {}
+    destinations: List<TaskListState> = listOf(),
+    handle: (TaskEvent) -> Unit = {}
 ) {
     var taskState by remember { mutableStateOf(TState.MAIN) }
 
@@ -119,13 +123,22 @@ fun Task(
                         value = state.title,
                         label = { Text(stringResource(R.string.new_header)) },
                         onConfirm = { newTitle ->
-                            handle(TaskEvents.ChangeTitle(state.id, newTitle))
+                            handle(TaskEvent.ChangeTitle(state.id, newTitle))
                             back()
                         },
                         onCancel = ::back
                     )
                 }
-                TState.MOVE_MENU -> {}
+                TState.MOVE_MENU -> {
+                    MoveMenu(
+                        destinations = destinations.filter { it.id != state.listId },
+                        onBack = ::back,
+                        onDestinationSelected = { dest ->
+                            handle(TaskEvent.Move(state.id, dest))
+                            back()
+                        }
+                    )
+                }
                 TState.POINTS_EDIT -> {
                     ChangeValueMenu(
                         value = state.points.toString(),
@@ -133,7 +146,7 @@ fun Task(
                         label = { Text(stringResource(id = R.string.points)) },
                         onConfirm = { newPoints ->
                             handle(
-                                TaskEvents.ChangePoints(
+                                TaskEvent.ChangePoints(
                                     state.id,
                                     if (newPoints.isBlank() || newPoints.toIntOrNull() == null) 0 else newPoints.toInt()
                                 )
@@ -146,7 +159,7 @@ fun Task(
                 TState.EDIT -> {
                     TaskEditMenu(state = state, onConfirm = { nn, nd, np ->
                         handle(
-                            TaskEvents.Edit(
+                            TaskEvent.Edit(
                                 id = state.id,
                                 newName = nn,
                                 newDescription = nd,
@@ -159,7 +172,7 @@ fun Task(
                 TState.DELETE_CONFIRMATION -> {
                     DeleteConfirmation(
                         onConfirm = {
-                            handle(TaskEvents.Delete(state.id))
+                            handle(TaskEvent.Delete(state.id))
                             back()
                         },
                         onCancel = ::back
@@ -301,6 +314,41 @@ private fun MenuState(
             onClick = onDelete,
             icon = { Icon(Icons.Default.Delete, null, tint = deleteStyle.color) },
             text = { Text(stringResource(R.string.delete), style = deleteStyle) })
+    }
+}
+
+@Composable
+private fun MoveMenu(
+    modifier: Modifier = Modifier,
+    destinations: List<TaskListState> = listOf(),
+    onDestinationSelected: (id: Long) -> Unit,
+    onBack: () -> Unit
+) {
+    Column(modifier) {
+        BackButton(onClick = onBack)
+        Divider()
+        Spacer(modifier = Modifier.height(theme.spacing.large))
+
+        if (destinations.isEmpty()) {
+            Text(
+                modifier = Modifier.padding(theme.spacing.corner),
+                text = stringResource(R.string.no_available_task_lists_to_move),
+                style = theme.typography.body1
+            )
+        } else {
+            destinations.forEach { dest ->
+                TransparentButton(
+                    onClick = { onDestinationSelected(dest.id) },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        modifier = Modifier.padding(horizontal = theme.spacing.corner),
+                        text = dest.title,
+                        style = theme.typography.h6
+                    )
+                }
+            }
+        }
     }
 }
 

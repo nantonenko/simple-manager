@@ -4,14 +4,11 @@ import androidx.compose.animation.*
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CornerBasedShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -25,8 +22,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.hfad.simplemanager.R
-import com.hfad.simplemanager.ui.TaskEvents
-import com.hfad.simplemanager.ui.TaskListEvents
+import com.hfad.simplemanager.ui.TaskEvent
+import com.hfad.simplemanager.ui.TaskListEvent
 import com.hfad.simplemanager.ui.components.*
 import com.hfad.simplemanager.ui.theme.elevation
 import com.hfad.simplemanager.ui.theme.round
@@ -34,8 +31,8 @@ import com.hfad.simplemanager.ui.theme.spacing
 import com.hfad.simplemanager.ui.theme.theme
 
 data class TaskListState(
-    val id: Int = 0,
-    val projectId: Int = 0,
+    val id: Long = 0,
+    val projectId: Long = 0,
     val title: String = ""
 )
 
@@ -50,9 +47,10 @@ private enum class TlState { MAIN, RENAME, MENU, DELETE_CONFIRMATION }
 fun TaskList(
     modifier: Modifier = Modifier,
     state: TaskListState = TaskListState(),
+    destinations: List<TaskListState> = listOf(),
     tasks: List<TaskState> = listOf(),
-    taskEventHandler: (TaskEvents) -> Unit = {},
-    handle: (TaskListEvents) -> Unit = {}
+    taskEventHandler: (TaskEvent) -> Unit = {},
+    handle: (TaskListEvent) -> Unit = {}
 ) {
     var tlState by remember { mutableStateOf(TlState.MAIN) }
     val menuIconDegree: Float by animateFloatAsState(if (tlState == TlState.MAIN) 0f else 90f)
@@ -93,8 +91,11 @@ fun TaskList(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(state.title, style = theme.typography.h4)
-                    IconButton(onClick = { if (tlState == TlState.MAIN) menu() else main() }) {
+                    Text(state.title, style = theme.typography.h4, modifier = Modifier.weight(1f))
+                    IconButton(
+                        onClick = { if (tlState == TlState.MAIN) menu() else main() },
+                        modifier = Modifier.requiredWidth(48.dp)
+                    ) {
                         Icon(
                             Icons.Default.Menu, null, modifier = Modifier.rotate(menuIconDegree)
                         )
@@ -113,7 +114,7 @@ fun TaskList(
                             ChangeValueMenu(
                                 value = state.title,
                                 onConfirm = { newTitle ->
-                                    handle(TaskListEvents.ChangeTitle(state.id, newTitle))
+                                    handle(TaskListEvent.ChangeTitle(state.id, newTitle))
                                     main()
                                 },
                                 onCancel = { main() })
@@ -127,7 +128,7 @@ fun TaskList(
                         TlState.DELETE_CONFIRMATION -> {
                             DeleteConfirmation(
                                 onConfirm = {
-                                    handle(TaskListEvents.Delete(state.id))
+                                    handle(TaskListEvent.Delete(state.id))
                                     main()
                                 },
                                 onCancel = { main() }
@@ -147,6 +148,7 @@ fun TaskList(
                         Task(
                             modifier = Modifier.fillMaxWidth(),
                             state = task,
+                            destinations = destinations,
                             handle = taskEventHandler
                         )
                     }
@@ -164,7 +166,17 @@ fun TaskList(
                 if (it) {
                     TaskEditMenu(
                         onCancel = { isNewTaskNameEdit = false },
-                        onConfirm = {_,_,_ -> isNewTaskNameEdit = false},
+                        onConfirm = { title, descr, points ->
+                            isNewTaskNameEdit = false
+                            handle(
+                                TaskListEvent.AddNewTask(
+                                    state.id,
+                                    title,
+                                    descr,
+                                    if (points.isBlank() || points.toIntOrNull() == null) 0 else points.toInt()
+                                )
+                            )
+                        },
                         modifier = Modifier.background(color = theme.colors.surface)
                     )
                 } else {
@@ -213,7 +225,7 @@ private fun MenuState(
 @Composable
 fun PreviewTaskList() {
     TaskList(
-        state = TaskListState(id = 0, title = "TODO"),
+        state = TaskListState(id = 0, title = "vary vary vary vary vary vary vary vary long name"),
         tasks = listOf(
             TaskState(
                 id = 0,

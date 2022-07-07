@@ -24,7 +24,7 @@ fun TaskEditMenu(
 ) {
     var title by remember { mutableStateOf(state.title) }
     var description by remember { mutableStateOf(state.description) }
-    var points by remember { mutableStateOf(state.points.toString()) }
+    var points by remember { mutableStateOf(if (state.points == 0) "" else state.points.toString()) }
 
     val fm = Modifier.fillMaxWidth()
 

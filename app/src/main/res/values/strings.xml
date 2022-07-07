@@ -15,4 +15,5 @@
     <string name="header">Заголовок</string>
     <string name="description">Описание</string>
     <string name="edit_points">Редактировать очки</string>
+    <string name="no_available_task_lists_to_move">Нет достуаных списков для перемещения</string>
 </resources>
