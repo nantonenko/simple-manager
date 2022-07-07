@@ -18,4 +18,6 @@
     <string name="no_available_task_lists_to_move">Нет достуаных списков для перемещения</string>
     <string name="task_lists">Задачи</string>
     <string name="projects">Проекты</string>
+    <string name="name">Название</string>
+    <string name="select">Выбрать</string>
 </resources>

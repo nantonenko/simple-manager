@@ -55,5 +55,6 @@ data class TaskListEntity(
 data class ProjectEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     @ColumnInfo val name: String = "",
-    @ColumnInfo val description: String = ""
+    @ColumnInfo val description: String = "",
+    @ColumnInfo(name = "is_selected") val isSelected: Boolean = false
 )

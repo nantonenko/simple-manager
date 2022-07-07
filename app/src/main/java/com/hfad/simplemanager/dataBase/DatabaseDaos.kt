@@ -74,4 +74,7 @@ interface ProjectDao {
 
     @Query("SELECT * FROM projects")
     fun getAllSync(): List<ProjectEntity>
+
+    @Query("SELECT * FROM projects WHERE is_selected = 1")
+    fun getSelectedProject(): ProjectEntity?
 }

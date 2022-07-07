@@ -1,24 +1,30 @@
 package com.hfad.simplemanager.ui.ProjectsScreen
 
+import android.provider.SyncStateContract.Helpers.insert
+import android.provider.SyncStateContract.Helpers.update
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.viewModelScope
+import com.hfad.simplemanager.Repository
 import com.hfad.simplemanager.dataBase.ProjectDao
 import com.hfad.simplemanager.dataBase.ProjectEntity
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
-class ProjectScreenVM : ViewModel() {
+class ProjectScreenVM(private val repo: Repository) : ViewModel() {
 
-    lateinit var prjDao: ProjectDao
-    val prjFlow: Flow<List<ProjectEntity>> get() = prjDao.getAll()
+    val prjFlow: Flow<List<ProjectEntity>> get() = repo.projectFlow
 
     fun createNewProject() = viewModelScope.launch(Dispatchers.IO) {
-        prjDao.insert(ProjectEntity(name = "new project"))
+        repo.projectDao.insert(ProjectEntity(name = "new project"))
     }
 
-    fun updateProject(e: ProjectEntity) = viewModelScope.launch(Dispatchers.IO) {
-        prjDao.update(e)
+    fun updateProject(project: ProjectEntity) = viewModelScope.launch(Dispatchers.IO) {
+        repo.projectDao.update(project)
+    }
+
+    fun onProjectSelected(project: ProjectEntity) = viewModelScope.launch(Dispatchers.IO) {
+        repo.updateCurrentProject(project)
     }
 }

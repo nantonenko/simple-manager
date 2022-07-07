@@ -2,6 +2,7 @@ package com.hfad.simplemanager.ui.TaskListScreen
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import com.hfad.simplemanager.Repository
 import com.hfad.simplemanager.dataBase.TaskDao
 import com.hfad.simplemanager.dataBase.TaskListDao
 import com.hfad.simplemanager.ui.Event
@@ -14,8 +15,7 @@ import java.lang.IllegalArgumentException
 
 class TaskScreenVM : ViewModel() {
 
-    lateinit var taskListDao: TaskListDao
-    lateinit var taskDao: TaskDao
+    lateinit var repo: Repository
 
     private val taskList = mutableListOf<TaskState>()
     private val columnList = mutableListOf<TaskListState>()

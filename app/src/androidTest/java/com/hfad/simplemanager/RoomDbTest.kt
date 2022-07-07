@@ -124,6 +124,19 @@ class RoomDbTest {
         assertTrue(taskDao.getAllSync().isEmpty())
     }
 
+    @Test
+    fun getSelectedProject() {
+        projectDao.insert(basePrj.copy(isSelected = true))
+        val p = projectDao.getSelectedProject()
+        println(p)
+    }
+
+    @Test
+    fun getSelectedProjectWhenNoSelectedProject() {
+        val p = projectDao.getSelectedProject()
+        println(p)
+    }
+
     @After
     @Throws(IOException::class)
     fun closeDb() {
@@ -132,6 +145,7 @@ class RoomDbTest {
         projectDao.deleteAll()
         db.close()
     }
+
 
     private val basePrj = ProjectEntity(name = "base", description = "none")
     private fun baseProjectInsert(): Long {
