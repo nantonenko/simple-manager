@@ -27,4 +27,8 @@ class ProjectScreenVM(private val repo: Repository) : ViewModel() {
     fun onProjectSelected(project: ProjectEntity) = viewModelScope.launch(Dispatchers.IO) {
         repo.updateCurrentProject(project)
     }
+
+    fun onProjectDeleted(project: ProjectEntity) = viewModelScope.launch(Dispatchers.IO) {
+        repo.projectDao.delete(project)
+    }
 }

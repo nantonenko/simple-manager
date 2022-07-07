@@ -48,7 +48,8 @@ fun ProjectScreen(vm: ProjectScreenVM = viewModel()) {
                 .padding(horizontal = theme.spacing.medium)
                 .fillMaxSize(),
             onProjectEdit = { e -> vm.updateProject(e) },
-            onProjectSelected = vm::onProjectSelected
+            onProjectSelected = vm::onProjectSelected,
+            onProjectDeleted = vm::onProjectDeleted
         )
 
         TransparentButton(
@@ -69,7 +70,8 @@ private fun ProjectList(
     modifier: Modifier = Modifier,
     prjs: List<ProjectEntity>,
     onProjectEdit: (prjEntity: ProjectEntity) -> Unit,
-    onProjectSelected: (prjEntity: ProjectEntity) -> Unit
+    onProjectSelected: (prjEntity: ProjectEntity) -> Unit,
+    onProjectDeleted: (prjEntity: ProjectEntity) -> Unit
 ) {
     LazyColumn(
         modifier = modifier,
@@ -92,7 +94,8 @@ private fun ProjectList(
                         )
                     )
                 },
-                onProjectSelected = { onProjectSelected(prj) }
+                onProjectSelected = { onProjectSelected(prj) },
+                onProjectDeleted = { onProjectDeleted(prj) }
             )
         }
     }
@@ -105,7 +108,8 @@ private fun ProjectCard(
     description: String = "",
     isSelected: Boolean = false,
     onProjectEdit: (name: String, descr: String) -> Unit,
-    onProjectSelected: () -> Unit
+    onProjectSelected: () -> Unit,
+    onProjectDeleted: () -> Unit
 ) {
     var isEditMode by remember { mutableStateOf(false) }
     val cardBoarderColor by animateColorAsState(
@@ -123,7 +127,9 @@ private fun ProjectCard(
         shape = theme.shapes.round,
         border = BorderStroke(2.dp, color = cardBoarderColor),
     ) {
-        Column(modifier = Modifier.fillMaxWidth().background(color = cardColor)) {
+        Column(modifier = Modifier
+            .fillMaxWidth()
+            .background(color = cardColor)) {
             Swapper(
                 key = isEditMode,
                 isContinues = true,
@@ -144,7 +150,8 @@ private fun ProjectCard(
                         name = name,
                         description = description,
                         onEditClicked = { isEditMode = true },
-                        onProjectSelected = onProjectSelected
+                        onProjectSelected = onProjectSelected,
+                        onProjectDeleted = onProjectDeleted
                     )
                 }
             }
@@ -157,7 +164,8 @@ private fun ProjectCardMain(
     name: String,
     description: String,
     onEditClicked: () -> Unit,
-    onProjectSelected: () -> Unit
+    onProjectSelected: () -> Unit,
+    onProjectDeleted: () -> Unit,
 ) {
     var isDescriptionOpened by remember { mutableStateOf(false) }
 
@@ -185,14 +193,25 @@ private fun ProjectCardMain(
         AnimatedVisibility(visible = isDescriptionOpened) {
             Divider()
             Column {
+                Spacer(modifier = Modifier.height(theme.spacing.extraLarge))
                 OutlinedTransparentButton(
                     onClick = onProjectSelected,
                     modifier = Modifier
-                        .padding(theme.spacing.corner)
+                        .padding(horizontal = theme.spacing.corner)
                         .fillMaxWidth()
                 ) {
                     Text(stringResource(R.string.select))
                 }
+                Spacer(modifier = Modifier.height(theme.spacing.medium))
+                OutlinedTransparentButton(
+                    onClick = onProjectDeleted,
+                    modifier = Modifier
+                        .padding(horizontal = theme.spacing.corner)
+                        .fillMaxWidth()
+                ) {
+                    Text(text = stringResource(R.string.delete), color = theme.colors.error)
+                }
+                Spacer(modifier = Modifier.height(theme.spacing.extraLarge))
 
                 if (description.isNotBlank()) {
                     Column(
