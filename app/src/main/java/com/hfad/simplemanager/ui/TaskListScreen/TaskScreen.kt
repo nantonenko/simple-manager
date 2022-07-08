@@ -9,14 +9,17 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Card
 import androidx.compose.material.Icon
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.hfad.simplemanager.R
 import com.hfad.simplemanager.ui.TaskScreenEvent
 import com.hfad.simplemanager.ui.components.ChangeValueMenu
 import com.hfad.simplemanager.ui.components.Swapper
@@ -28,10 +31,22 @@ import com.hfad.simplemanager.ui.theme.theme
 
 @Composable
 fun TaskScreen(vm: TaskScreenVM = viewModel()) {
-    val taskList by vm.taskFlow.collectAsState()
-    val columnList by vm.columnFlow.collectAsState()
-
+    val taskList by vm.taskFlow.collectAsState(listOf())
+    val columnList by vm.taskListFlow.collectAsState(listOf())
+    val selectedPrj by vm.selectedProjectFlow.collectAsState(initial = null)
+    
     val w = LocalConfiguration.current.screenWidthDp
+
+    if (selectedPrj == null) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            Text(
+                text = stringResource(R.string.project_is_not_selected),
+                modifier = Modifier.align(Alignment.Center),
+                style = theme.typography.h5
+            )
+        }
+        return
+    }
 
     LazyRow(
         modifier = Modifier

@@ -24,8 +24,14 @@ interface TaskDao {
     @Query("SELECT * FROM tasks")
     fun getAll(): Flow<List<TaskEntity>>
 
+    @Query("SELECT * FROM tasks WHERE id = :id")
+    fun getById(id: Long): TaskEntity?
+
     @Query("SELECT * FROM tasks")
     fun getAllSync(): List<TaskEntity>
+
+    @Query("SELECT * FROM tasks WHERE project_id = :projectId")
+    fun getAllForProject(projectId: Long): Flow<List<TaskEntity>>
 }
 
 @Dao
@@ -48,8 +54,14 @@ interface TaskListDao {
     @Query("SELECT * FROM task_lists")
     fun getAll(): Flow<List<TaskListEntity>>
 
+    @Query("SELECT * FROM task_lists WHERE id = :id")
+    fun getById(id: Long): TaskListEntity?
+
     @Query("SELECT * FROM task_lists")
     fun getAllSync(): List<TaskListEntity>
+
+    @Query("SELECT * FROM task_lists WHERE project_id = :projectId")
+    fun getAllForProject(projectId: Long): Flow<List<TaskListEntity>>
 }
 
 @Dao
@@ -76,5 +88,8 @@ interface ProjectDao {
     fun getAllSync(): List<ProjectEntity>
 
     @Query("SELECT * FROM projects WHERE is_selected = 1")
-    fun getSelectedProject(): ProjectEntity?
+    fun getSelectedProjectSync(): ProjectEntity?
+
+    @Query("SELECT * FROM projects WHERE is_selected = 1")
+    fun getSelectedProject(): Flow<ProjectEntity?>
 }

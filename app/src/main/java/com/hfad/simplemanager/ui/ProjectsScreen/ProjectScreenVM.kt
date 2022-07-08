@@ -6,29 +6,34 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.viewModelScope
 import com.hfad.simplemanager.Repository
+import com.hfad.simplemanager.dataBase.AppDatabase
 import com.hfad.simplemanager.dataBase.ProjectDao
 import com.hfad.simplemanager.dataBase.ProjectEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import java.nio.file.Files.delete
 
-class ProjectScreenVM(private val repo: Repository) : ViewModel() {
+class ProjectScreenVM(private val projectDao: ProjectDao) : ViewModel() {
 
-    val prjFlow: Flow<List<ProjectEntity>> get() = repo.projectFlow
+    val prjFlow: Flow<List<ProjectEntity>> get() = projectDao.getAll()
 
     fun createNewProject() = viewModelScope.launch(Dispatchers.IO) {
-        repo.projectDao.insert(ProjectEntity(name = "new project"))
+        projectDao.insert(ProjectEntity(name = "new project"))
     }
 
     fun updateProject(project: ProjectEntity) = viewModelScope.launch(Dispatchers.IO) {
-        repo.projectDao.update(project)
+        projectDao.update(project)
     }
 
     fun onProjectSelected(project: ProjectEntity) = viewModelScope.launch(Dispatchers.IO) {
-        repo.updateCurrentProject(project)
+        projectDao.getSelectedProjectSync()?.let { prj ->
+            projectDao.update(prj.copy(isSelected = false))
+        }
+        projectDao.update(project.copy(isSelected = true))
     }
 
     fun onProjectDeleted(project: ProjectEntity) = viewModelScope.launch(Dispatchers.IO) {
-        repo.projectDao.delete(project)
+        projectDao.delete(project)
     }
 }

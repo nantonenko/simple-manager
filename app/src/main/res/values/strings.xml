@@ -20,4 +20,5 @@
     <string name="projects">Проекты</string>
     <string name="name">Название</string>
     <string name="select">Выбрать</string>
+    <string name="project_is_not_selected">Проект не выбран</string>
 </resources>

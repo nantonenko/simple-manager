@@ -26,13 +26,11 @@ class SimpleManagerApp : Application() {
 
         repository = Repository(db)
 
-        taskScreenVM = TaskScreenVM()
-        projectScreenVM = ProjectScreenVM(repository)
+        taskScreenVM = TaskScreenVM(db)
+        projectScreenVM = ProjectScreenVM(db.projectDao())
 
         runBlocking(Dispatchers.IO) {
             db.projectDao().deleteAll()
         }
-
-        taskScreenVM.repo = repository
     }
 }

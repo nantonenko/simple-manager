@@ -161,7 +161,7 @@ fun Task(
                         handle(
                             TaskEvent.Edit(
                                 id = state.id,
-                                newName = nn,
+                                newTitle = nn,
                                 newDescription = nd,
                                 newPoints = if (np.isBlank() || np.toIntOrNull() == null) 0 else np.toInt()
                             )

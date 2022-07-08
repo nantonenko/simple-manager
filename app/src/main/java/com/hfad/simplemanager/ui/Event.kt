@@ -7,9 +7,9 @@ sealed class TaskScreenEvent : Event() {
 }
 
 sealed class TaskEvent(val id: Long) : Event() {
-    class ChangeTitle(id: Long, val newName: String) : TaskEvent(id)
+    class ChangeTitle(id: Long, val newTitle: String) : TaskEvent(id)
     class ChangePoints(id: Long, val newPoints: Int) : TaskEvent(id)
-    class Edit(id: Long, val newName: String, val newDescription: String, val newPoints: Int) :
+    class Edit(id: Long, val newTitle: String, val newDescription: String, val newPoints: Int) :
         TaskEvent(id)
 
     class Move(id: Long, val destTaskListId: Long) : TaskEvent(id)

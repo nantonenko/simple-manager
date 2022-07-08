@@ -2,29 +2,34 @@ package com.hfad.simplemanager.ui.TaskListScreen
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import com.hfad.simplemanager.Repository
-import com.hfad.simplemanager.dataBase.TaskDao
-import com.hfad.simplemanager.dataBase.TaskListDao
+import androidx.lifecycle.viewModelScope
+import com.hfad.simplemanager.dataBase.*
 import com.hfad.simplemanager.ui.Event
 import com.hfad.simplemanager.ui.TaskEvent
 import com.hfad.simplemanager.ui.TaskListEvent
 import com.hfad.simplemanager.ui.TaskScreenEvent
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import java.lang.IllegalArgumentException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
+import kotlin.IllegalArgumentException
 
-class TaskScreenVM : ViewModel() {
+class TaskScreenVM(db: AppDatabase) : ViewModel() {
 
-    lateinit var repo: Repository
+    private val projectDao = db.projectDao()
+    private val taskListDao = db.taskListDao()
+    private val taskDao = db.taskDao()
 
     private val taskList = mutableListOf<TaskState>()
     private val columnList = mutableListOf<TaskListState>()
 
-    private val _taskFlow = MutableStateFlow<List<TaskState>>(listOf())
-    val taskFlow: StateFlow<List<TaskState>> get() = _taskFlow
+    var taskFlow: Flow<List<TaskState>> = flow { emit(listOf()) }
+        private set
 
-    private val _columnFlow = MutableStateFlow<List<TaskListState>>(listOf())
-    val columnFlow: StateFlow<List<TaskListState>> get() = _columnFlow
+    var taskListFlow: Flow<List<TaskListState>> = flow { emit(listOf()) }
+        private set
+
+    val selectedProjectFlow = projectDao.getSelectedProject()
 
     private var columnId: Long = 0
         get() {
@@ -37,30 +42,35 @@ class TaskScreenVM : ViewModel() {
         }
 
     init {
-        updateColumns {
-            columnList.add(TaskListState(id = columnId, title = "TODO"))
+        ioLaunch {
+            val sp = projectDao.getSelectedProjectSync() ?: return@ioLaunch
         }
 
-        updateTasks {
-            taskList.add(
-                TaskState(
-                    id = taskId,
-                    listId = columnList.first().id,
-                    title = "title 1",
-                    description = "description",
-                    points = 120
-                )
-            )
+        ioLaunch {
+            selectedProjectFlow.filterNotNull().collect { prj -> updateFlow(prj.id) }
         }
     }
+
+    private fun updateFlow(projectId: Long) {
+        taskListFlow =
+            taskListDao.getAllForProject(projectId).map { e -> e.map { taskListEntityToState(it) } }
+
+        taskFlow = taskDao.getAllForProject(projectId).map { e -> e.map { taskEntityToState(it) } }
+    }
+
+
+    /**
+     * event handling
+     */
 
     fun handleEvent(e: Event) {
         when (e) {
             is TaskScreenEvent -> handleTaskScreenEvents(e)
-            is TaskListEvent -> handleColumnEvent(e)
+            is TaskListEvent -> handleTaskListEvents(e)
             is TaskEvent -> handleTaskEvents(e)
         }
     }
+
 
     /**
      * handle task screen events
@@ -68,8 +78,11 @@ class TaskScreenVM : ViewModel() {
 
     private fun handleTaskScreenEvents(e: TaskScreenEvent) {
         when (e) {
-            is TaskScreenEvent.NewTaskList -> updateColumns {
-                columnList.add(TaskListState(id = columnId, title = e.title))
+            is TaskScreenEvent.NewTaskList -> ioLaunch {
+                taskListDao.insert(TaskListEntity(
+                    projectId = projectDao.getSelectedProjectSync()!!.id,
+                    title = e.title
+                ))
             }
         }
     }
@@ -79,35 +92,30 @@ class TaskScreenVM : ViewModel() {
      * handle task lsit events
      */
 
-    private fun handleColumnEvent(e: TaskListEvent) {
+    private fun handleTaskListEvents(e: TaskListEvent) {
         when (e) {
-            is TaskListEvent.Delete -> updateColumns { columnList.removeAll { it.id == e.id } }
-            is TaskListEvent.ChangeTitle -> changeColumnTitle(e.id, e.newTitle)
+            is TaskListEvent.Delete -> ioLaunch { taskListDao.deleteById(e.id) }
+            is TaskListEvent.ChangeTitle -> changeTaskListTitle(e.id, e.newTitle)
             is TaskListEvent.AddNewTask -> addNewTask(e)
         }
     }
 
-    private fun changeColumnTitle(id: Long, title: String) = updateColumns {
-        val i = getColumnIdx(id)
-        columnList[i] = columnList[i].copy(title = title)
+    private fun changeTaskListTitle(id: Long, title: String) = ioLaunch {
+        val e = taskListDao.getById(id)
+            ?: throw IllegalArgumentException("can't find TaskListEntity with this id")
+        taskListDao.update(e.copy(title = title))
     }
 
-    private fun addNewTask(e: TaskListEvent.AddNewTask) = updateTasks {
-        val newTask = TaskState(
-            id = taskId,
-            listId = e.id,
-            title = e.title,
-            description = e.description,
-            points = e.points
+    private fun addNewTask(e: TaskListEvent.AddNewTask) = ioLaunch {
+        taskDao.insert(
+            TaskEntity(
+                taskListId = e.id,
+                projectId = projectDao.getSelectedProjectSync()!!.id,
+                title = e.title,
+                description = e.description,
+                points = e.points
+            )
         )
-        taskList.add(newTask)
-        Log.i(TAG, "new task = $newTask")
-    }
-
-    private fun getColumnIdx(id: Long): Int {
-        val i = columnList.indexOfFirst { it.id == id }
-        if (i == 1) throw IllegalArgumentException("can't find column with given ID")
-        return i
     }
 
 
@@ -125,39 +133,38 @@ class TaskScreenVM : ViewModel() {
         }
     }
 
-    private fun moveTask(e: TaskEvent.Move) = updateTasks {
-        val i = getTaskIdx(e.id)
-        taskList[i] = taskList[i].copy(listId = e.destTaskListId)
+    private fun moveTask(e: TaskEvent.Move) = ioLaunch {
+        val task =
+            taskDao.getById(e.id) ?: throw IllegalArgumentException("can't find task with this id")
+        taskDao.update(task.copy(taskListId = e.destTaskListId))
     }
 
-    private fun changeTitle(e: TaskEvent.ChangeTitle) = updateTasks {
-        val i = getTaskIdx(e.id)
-        taskList[i] = taskList[i].copy(title = e.newName)
+    private fun changeTitle(e: TaskEvent.ChangeTitle) = ioLaunch {
+        val task =
+            taskDao.getById(e.id) ?: throw IllegalArgumentException("can't find task with this id")
+        taskDao.update(task.copy(title = e.newTitle))
     }
 
-    private fun changePoints(e: TaskEvent.ChangePoints) = updateTasks {
-        Log.i(TAG, "change points = ${e.id}")
-        val i = getTaskIdx(e.id)
-        taskList[i] = taskList[i].copy(points = e.newPoints)
+    private fun changePoints(e: TaskEvent.ChangePoints) = ioLaunch {
+        val task =
+            taskDao.getById(e.id) ?: throw IllegalArgumentException("can't find task with this id")
+        taskDao.update(task.copy(points = e.newPoints))
     }
 
-    private fun deleteTask(e: TaskEvent.Delete) = updateTasks {
-        taskList.removeAt(getTaskIdx(e.id))
+    private fun deleteTask(e: TaskEvent.Delete) = ioLaunch {
+        taskDao.deleteById(e.id)
     }
 
-    private fun editTask(e: TaskEvent.Edit) = updateTasks {
-        val i = getTaskIdx(e.id)
-        taskList[i] = taskList[i].copy(
-            title = e.newName,
-            description = e.newDescription,
-            points = e.newPoints
+    private fun editTask(e: TaskEvent.Edit) = ioLaunch {
+        val task =
+            taskDao.getById(e.id) ?: throw IllegalArgumentException("can't find task with this id")
+        taskDao.update(
+            task.copy(
+                title = e.newTitle,
+                description = e.newDescription,
+                points = e.newPoints
+            )
         )
-    }
-
-    private fun getTaskIdx(id: Long): Int {
-        val i = taskList.indexOfFirst { it.id == id }
-        if (i == -1) throw IllegalArgumentException("can't find task with given ID")
-        return i
     }
 
 
@@ -165,15 +172,23 @@ class TaskScreenVM : ViewModel() {
      * functions to update flows
      */
 
-    private fun updateColumns(listMutation: () -> Unit): Unit {
-        listMutation()
-        _columnFlow.value = columnList.toList()
-    }
+    private fun ioLaunch(fcn: suspend CoroutineScope.() -> Unit) =
+        viewModelScope.launch(context = Dispatchers.IO, block = fcn)
 
-    private fun updateTasks(listMutation: () -> Unit): Unit {
-        listMutation()
-        _taskFlow.value = taskList.toList()
-    }
+    private fun taskEntityToState(e: TaskEntity): TaskState = TaskState(
+        id = e.id,
+        projectId = e.projectId,
+        listId = e.taskListId,
+        title = e.title,
+        description = e.description,
+        points = e.points
+    )
+
+    private fun taskListEntityToState(e: TaskListEntity): TaskListState = TaskListState(
+        id = e.id,
+        projectId = e.projectId,
+        title = e.title
+    )
 
     companion object {
         const val TAG = "TaskScreenVM"

@@ -127,13 +127,13 @@ class RoomDbTest {
     @Test
     fun getSelectedProject() {
         projectDao.insert(basePrj.copy(isSelected = true))
-        val p = projectDao.getSelectedProject()
+        val p = projectDao.getSelectedProjectSync()
         println(p)
     }
 
     @Test
     fun getSelectedProjectWhenNoSelectedProject() {
-        val p = projectDao.getSelectedProject()
+        val p = projectDao.getSelectedProjectSync()
         println(p)
     }
 
