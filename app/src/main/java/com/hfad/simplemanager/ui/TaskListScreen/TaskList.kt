@@ -6,7 +6,6 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -14,13 +13,13 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -87,7 +86,9 @@ fun TaskList(
                 visible = isNewTaskNameEdit,
                 enter = expandVertically(tween(350, easing = LinearEasing)) { -it },
                 exit = shrinkVertically(tween(350, easing = LinearEasing)) { -it },
-                modifier = Modifier.align(Alignment.TopCenter).zIndex(1f)
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .zIndex(1f)
             ) {
                 TaskEditMenu(
                     onCancel = { isNewTaskNameEdit = false },
@@ -154,7 +155,23 @@ fun TaskList(
                         TlState.MENU -> {
                             MenuState(
                                 onRename = { rename() },
-                                onDelete = { delete() }
+                                onDelete = { delete() },
+                                onRight = {
+                                    handle(
+                                        TaskListEvent.Move(
+                                            state.id,
+                                            diraction = TaskListEvent.Move.Diractions.RIGHT
+                                        )
+                                    )
+                                },
+                                onLeft = {
+                                    handle(
+                                        TaskListEvent.Move(
+                                            state.id,
+                                            diraction = TaskListEvent.Move.Diractions.LEFT
+                                        )
+                                    )
+                                }
                             )
                         }
                         TlState.DELETE_CONFIRMATION -> {
@@ -215,9 +232,19 @@ fun TaskList(
 private fun MenuState(
     modifier: Modifier = Modifier,
     onRename: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    onRight: () -> Unit,
+    onLeft: () -> Unit
 ) {
     Column(modifier, horizontalAlignment = Alignment.CenterHorizontally) {
+        Row(modifier = Modifier.fillMaxWidth()) {
+            TransparentButton(onClick = onLeft, modifier = Modifier.weight(1f)) {
+                Icon(Icons.Default.ArrowBack, null)
+            }
+            TransparentButton(onClick = onRight, modifier = Modifier.weight(1f)) {
+                Icon(Icons.Default.ArrowBack, null, modifier = Modifier.rotate(180f))
+            }
+        }
         TransparentButton(onClick = onRename, modifier = Modifier.fillMaxWidth()) {
             Text(stringResource(id = R.string.rename), style = theme.typography.h6)
         }

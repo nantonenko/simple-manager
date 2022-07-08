@@ -21,16 +21,16 @@ interface TaskDao {
     @Update
     fun update(task: TaskEntity)
 
-    @Query("SELECT * FROM tasks")
+    @Query("SELECT * FROM tasks ORDER BY position")
     fun getAll(): Flow<List<TaskEntity>>
 
     @Query("SELECT * FROM tasks WHERE id = :id")
     fun getById(id: Long): TaskEntity?
 
-    @Query("SELECT * FROM tasks")
+    @Query("SELECT * FROM tasks ORDER BY position")
     fun getAllSync(): List<TaskEntity>
 
-    @Query("SELECT * FROM tasks WHERE project_id = :projectId")
+    @Query("SELECT * FROM tasks WHERE project_id = :projectId ORDER BY position")
     fun getAllForProject(projectId: Long): Flow<List<TaskEntity>>
 }
 
@@ -51,16 +51,16 @@ interface TaskListDao {
     @Update
     fun update(list: TaskListEntity)
 
-    @Query("SELECT * FROM task_lists")
+    @Query("SELECT * FROM task_lists  ORDER BY position")
     fun getAll(): Flow<List<TaskListEntity>>
 
     @Query("SELECT * FROM task_lists WHERE id = :id")
     fun getById(id: Long): TaskListEntity?
 
-    @Query("SELECT * FROM task_lists")
+    @Query("SELECT * FROM task_lists  ORDER BY position")
     fun getAllSync(): List<TaskListEntity>
 
-    @Query("SELECT * FROM task_lists WHERE project_id = :projectId")
+    @Query("SELECT * FROM task_lists WHERE project_id = :projectId ORDER BY position")
     fun getAllForProject(projectId: Long): Flow<List<TaskListEntity>>
 }
 

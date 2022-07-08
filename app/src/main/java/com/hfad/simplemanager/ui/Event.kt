@@ -13,10 +13,16 @@ sealed class TaskEvent(val id: Long) : Event() {
         TaskEvent(id)
 
     class Move(id: Long, val destTaskListId: Long) : TaskEvent(id)
+    class MoveUpDown(id: Long, val diraction: Diractions ): TaskEvent(id) {
+        enum class Diractions { UP, DOWN }
+    }
     class Delete(id: Long) : TaskEvent(id)
 }
 
 sealed class TaskListEvent(val id: Long) : Event() {
+    class Move(id: Long, val diraction: Diractions): TaskListEvent(id) {
+        enum class Diractions { LEFT, RIGHT }
+    }
     class ChangeTitle(id: Long, val newTitle: String) : TaskListEvent(id)
     class Delete(id: Long) : TaskListEvent(id)
     class AddNewTask(id: Long, val title: String, val description: String, val points: Int) :

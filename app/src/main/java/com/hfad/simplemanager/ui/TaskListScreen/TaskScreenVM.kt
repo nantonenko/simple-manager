@@ -78,13 +78,20 @@ class TaskScreenVM(db: AppDatabase) : ViewModel() {
 
     private fun handleTaskScreenEvents(e: TaskScreenEvent) {
         when (e) {
-            is TaskScreenEvent.NewTaskList -> ioLaunch {
-                taskListDao.insert(TaskListEntity(
-                    projectId = projectDao.getSelectedProjectSync()!!.id,
-                    title = e.title
-                ))
-            }
+            is TaskScreenEvent.NewTaskList -> addNewTaskList(e)
         }
+    }
+
+    private fun addNewTaskList(e: TaskScreenEvent.NewTaskList) = ioLaunch {
+        val lists = taskListDao.getAllSync()
+        val nextPosition = if (lists.isNotEmpty()) lists.map { it.position }.maxOf { it } + 1 else 0
+        taskListDao.insert(
+            TaskListEntity(
+                projectId = projectDao.getSelectedProjectSync()!!.id,
+                title = e.title,
+                position = nextPosition
+            )
+        )
     }
 
 
@@ -94,9 +101,41 @@ class TaskScreenVM(db: AppDatabase) : ViewModel() {
 
     private fun handleTaskListEvents(e: TaskListEvent) {
         when (e) {
-            is TaskListEvent.Delete -> ioLaunch { taskListDao.deleteById(e.id) }
+            is TaskListEvent.Delete -> deleteTaskList(e)
             is TaskListEvent.ChangeTitle -> changeTaskListTitle(e.id, e.newTitle)
             is TaskListEvent.AddNewTask -> addNewTask(e)
+            is TaskListEvent.Move -> moveTaskList(e)
+        }
+    }
+
+    private fun deleteTaskList(e: TaskListEvent.Delete) = ioLaunch {
+        val lists = taskListDao.getAllSync()
+        val i = lists.indexOfFirst { it.id == e.id }
+        if (i == -1) throw IllegalArgumentException("can't find task list with this id")
+        for (k in i..lists.lastIndex) {
+            taskListDao.update(lists[k].copy(position = lists[k].position - 1))
+        }
+        taskListDao.deleteById(e.id)
+    }
+
+    private fun moveTaskList(e: TaskListEvent.Move) = ioLaunch {
+        val lists = taskListDao.getAllSync()
+        val i = lists.indexOfFirst { it.id == e.id }
+        if (i == -1) throw IllegalArgumentException("can't find task list with this id")
+
+        val left = TaskListEvent.Move.Diractions.LEFT
+        val right = TaskListEvent.Move.Diractions.RIGHT
+
+        if (e.diraction == left && i != 0) {
+            val p = lists[i].position
+            taskListDao.update(lists[i].copy(position = p - 1))
+            taskListDao.update(lists[i - 1].copy(position = p))
+        }
+
+        if (e.diraction == right && i != lists.lastIndex) {
+            val p = lists[i].position
+            taskListDao.update(lists[i].copy(position = p + 1))
+            taskListDao.update(lists[i + 1].copy(position = p))
         }
     }
 

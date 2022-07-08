@@ -59,13 +59,17 @@ fun TaskScreen(vm: TaskScreenVM = viewModel()) {
         return
     }
 
-    HorizontalPager(count = columnList.size + 1) { page ->
+    HorizontalPager(
+        count = columnList.size + 1,
+        key = { i -> if (columnList.isNotEmpty() && i != columnList.lastIndex + 1) columnList[i].id else Int.MAX_VALUE }
+    ) { page ->
         if (page == columnList.lastIndex + 1) {
             Box(modifier = Modifier.fillMaxSize()) {
                 NewTaskList(
                     Modifier
                         .width(w.dp)
-                        .align(Alignment.TopCenter)) {
+                        .align(Alignment.TopCenter)
+                ) {
                     vm.handleEvent(
                         TaskScreenEvent.NewTaskList(it)
                     )

@@ -28,6 +28,7 @@ data class TaskEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     @ColumnInfo(name = "task_list_id", index = true) val taskListId: Long = 0,
     @ColumnInfo(name = "project_id", index = true) val projectId: Long = 0,
+    @ColumnInfo val position: Int = 0,
     @ColumnInfo val title: String = "",
     @ColumnInfo val description: String = "",
     @ColumnInfo val points: Int = 0
@@ -47,6 +48,7 @@ data class TaskEntity(
 )
 data class TaskListEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    @ColumnInfo val position: Int = 0,
     @ColumnInfo(name = "project_id") val projectId: Long = 0,
     @ColumnInfo val title: String = ""
 )
