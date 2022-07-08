@@ -10,6 +10,7 @@
 
 # Создание проекта
 ![](https://github.com/nantonenko/simple-manager/blob/master/gifs/project_convert_select.gif)
+<img src="https://github.com/nantonenko/simple-manager/blob/master/gifs/project_convert_select.gif" width="50%" height="50%"/>
 
 # Редактирование проекта
 ![](https://github.com/nantonenko/simple-manager/blob/master/gifs/project_editing.gif)
