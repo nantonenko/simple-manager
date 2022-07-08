@@ -4,7 +4,9 @@ import androidx.compose.animation.*
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -18,9 +20,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import com.hfad.simplemanager.R
 import com.hfad.simplemanager.ui.TaskEvent
 import com.hfad.simplemanager.ui.TaskListEvent
@@ -43,6 +47,7 @@ private enum class TlState { MAIN, RENAME, MENU, DELETE_CONFIRMATION }
  * [MenuState] state with menu (rename and delete)
  */
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TaskList(
     modifier: Modifier = Modifier,
@@ -54,6 +59,7 @@ fun TaskList(
 ) {
     var tlState by remember { mutableStateOf(TlState.MAIN) }
     val menuIconDegree: Float by animateFloatAsState(if (tlState == TlState.MAIN) 0f else 90f)
+    var isNewTaskNameEdit by remember { mutableStateOf(false) }
 
     fun main() {
         tlState = TlState.MAIN
@@ -77,6 +83,32 @@ fun TaskList(
         elevation = if (isSystemInDarkTheme()) theme.elevation.small else theme.elevation.large
     ) {
         Box {
+            AnimatedVisibility(
+                visible = isNewTaskNameEdit,
+                enter = expandVertically(tween(350, easing = LinearEasing)) { -it },
+                exit = shrinkVertically(tween(350, easing = LinearEasing)) { -it },
+                modifier = Modifier.align(Alignment.TopCenter).zIndex(1f)
+            ) {
+                TaskEditMenu(
+                    onCancel = { isNewTaskNameEdit = false },
+                    onConfirm = { title, descr, points ->
+                        isNewTaskNameEdit = false
+                        handle(
+                            TaskListEvent.AddNewTask(
+                                state.id,
+                                title,
+                                descr,
+                                if (points.isBlank() || points.toIntOrNull() == null) 0 else points.toInt()
+                            )
+                        )
+                    },
+                    modifier = Modifier
+                        .background(color = theme.colors.surface)
+                        .align(Alignment.TopCenter)
+                        .background(color = theme.colors.surface)
+                )
+            }
+
             Column(
                 modifier = Modifier
                     .animateContentSize()
@@ -144,9 +176,11 @@ fun TaskList(
                     verticalArrangement = Arrangement.spacedBy(theme.spacing.large),
                     modifier = Modifier.weight(1f)
                 ) {
-                    items(tasks.filter { it.listId == state.id }) { task ->
+                    items(items = tasks.filter { it.listId == state.id }, key = { it.id }) { task ->
                         Task(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .animateItemPlacement(),
                             state = task,
                             destinations = destinations,
                             handle = taskEventHandler
@@ -155,40 +189,21 @@ fun TaskList(
                 }
             }
 
-            var isNewTaskNameEdit by remember { mutableStateOf(false) }
 
-            Swapper(
-                key = isNewTaskNameEdit,
+            AnimatedVisibility(
+                visible = !isNewTaskNameEdit,
                 enter = expandVertically(tween(350, easing = LinearEasing)) { -it },
                 exit = shrinkVertically(tween(350, easing = LinearEasing)) { -it },
                 modifier = Modifier.align(Alignment.BottomCenter)
             ) {
-                if (it) {
-                    TaskEditMenu(
-                        onCancel = { isNewTaskNameEdit = false },
-                        onConfirm = { title, descr, points ->
-                            isNewTaskNameEdit = false
-                            handle(
-                                TaskListEvent.AddNewTask(
-                                    state.id,
-                                    title,
-                                    descr,
-                                    if (points.isBlank() || points.toIntOrNull() == null) 0 else points.toInt()
-                                )
-                            )
-                        },
-                        modifier = Modifier.background(color = theme.colors.surface)
-                    )
-                } else {
-                    TransparentButton(
-                        onClick = { isNewTaskNameEdit = true },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(48.dp),
-                        color = theme.colors.surface
-                    ) {
-                        Icon(Icons.Default.Add, null)
-                    }
+                TransparentButton(
+                    onClick = { isNewTaskNameEdit = true },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp),
+                    color = theme.colors.surface
+                ) {
+                    Icon(Icons.Default.Add, null)
                 }
             }
         }

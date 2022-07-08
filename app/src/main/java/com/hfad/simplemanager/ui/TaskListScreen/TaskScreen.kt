@@ -48,8 +48,6 @@ fun TaskScreen(vm: TaskScreenVM = viewModel()) {
 
     val w = LocalConfiguration.current.screenWidthDp
 
-    val taskListListState = rememberLazyListState()
-
     if (selectedPrj == null) {
         Box(modifier = Modifier.fillMaxSize()) {
             Text(
@@ -84,28 +82,6 @@ fun TaskScreen(vm: TaskScreenVM = viewModel()) {
             )
         }
     }
-//
-//    LazyRow(
-//        modifier = Modifier
-//            .padding(theme.spacing.medium)
-//            .fillMaxSize(),
-//        userScrollEnabled = true
-//    ) {
-//        items(columnList) { c ->
-//            TaskList(
-//                modifier = Modifier.width(w.dp),
-//                state = c,
-//                tasks = taskList,
-//                destinations = columnList,
-//                taskEventHandler = { vm.handleEvent(it) },
-//                handle = { vm.handleEvent(it) }
-//            )
-//        }
-//
-//        item {
-//            NewTaskList(Modifier.width(w.dp)) { vm.handleEvent(TaskScreenEvent.NewTaskList(it)) }
-//        }
-//    }
 }
 
 @Composable
