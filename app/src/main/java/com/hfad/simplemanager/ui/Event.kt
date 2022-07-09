@@ -13,8 +13,8 @@ sealed class TaskEvent(val id: Long) : Event() {
         TaskEvent(id)
 
     class Move(id: Long, val destTaskListId: Long) : TaskEvent(id)
-    class MoveUpDown(id: Long, val diraction: Diractions ): TaskEvent(id) {
-        enum class Diractions { UP, DOWN }
+    class MoveWithArrows(id: Long, val diraction: Diractions ): TaskEvent(id) {
+        enum class Diractions { UP, DOWN, LEFT, RIGHT }
     }
     class Delete(id: Long) : TaskEvent(id)
 }

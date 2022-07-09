@@ -32,6 +32,7 @@ import com.hfad.simplemanager.ui.components.ChangeValueMenu
 import com.hfad.simplemanager.ui.components.Swapper
 import com.hfad.simplemanager.ui.components.TransparentButton
 import com.hfad.simplemanager.ui.theme.elevation
+import com.hfad.simplemanager.ui.theme.round
 import com.hfad.simplemanager.ui.theme.spacing
 import com.hfad.simplemanager.ui.theme.theme
 import kotlinx.coroutines.delay
@@ -93,7 +94,8 @@ private fun NewTaskList(modifier: Modifier = Modifier, onNewTaskList: (String) -
     var isTitleEnter by remember { mutableStateOf(false) }
     Card(
         modifier = modifier.padding(theme.spacing.large),
-        elevation = theme.elevation.large
+        elevation = theme.elevation.large,
+        shape = theme.shapes.round
     ) {
         Column(
             modifier = Modifier.fillMaxWidth(),

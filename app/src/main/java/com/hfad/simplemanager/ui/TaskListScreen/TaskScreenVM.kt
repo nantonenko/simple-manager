@@ -109,7 +109,8 @@ class TaskScreenVM(db: AppDatabase) : ViewModel() {
     }
 
     private fun deleteTaskList(e: TaskListEvent.Delete) = ioLaunch {
-        val lists = taskListDao.getAllSync()
+        val prj = projectDao.getSelectedProjectSync()!!
+        val lists = taskListDao.getAllForProjectSync(prj.id)
         val i = lists.indexOfFirst { it.id == e.id }
         if (i == -1) throw IllegalArgumentException("can't find task list with this id")
         for (k in i..lists.lastIndex) {
@@ -119,7 +120,8 @@ class TaskScreenVM(db: AppDatabase) : ViewModel() {
     }
 
     private fun moveTaskList(e: TaskListEvent.Move) = ioLaunch {
-        val lists = taskListDao.getAllSync()
+        val prj = projectDao.getSelectedProjectSync()!!
+        val lists = taskListDao.getAllForProjectSync(prj.id)
         val i = lists.indexOfFirst { it.id == e.id }
         if (i == -1) throw IllegalArgumentException("can't find task list with this id")
 
@@ -169,6 +171,42 @@ class TaskScreenVM(db: AppDatabase) : ViewModel() {
             is TaskEvent.ChangePoints -> changePoints(e)
             is TaskEvent.ChangeTitle -> changeTitle(e)
             is TaskEvent.Move -> moveTask(e)
+            is TaskEvent.MoveWithArrows -> moveTaskWithArrow(e)
+        }
+    }
+
+    private val up = TaskEvent.MoveWithArrows.Diractions.UP
+    private val down = TaskEvent.MoveWithArrows.Diractions.DOWN
+    private val left = TaskEvent.MoveWithArrows.Diractions.LEFT
+    private val right = TaskEvent.MoveWithArrows.Diractions.RIGHT
+
+    private fun moveTaskWithArrow(e: TaskEvent.MoveWithArrows) = ioLaunch {
+        val listId = taskDao.getListIdForTask(e.id)
+        val tasks = taskDao.getAllForListSync(listId)
+        val prj = projectDao.getSelectedProjectSync()!!
+        val i = tasks.indexOfFirst { it.id == e.id }
+        if (i == -1) throw IllegalArgumentException("can't find task for this id")
+
+        val list = taskListDao.getById(listId)!!
+        val lists = taskListDao.getAllForProjectSync(prj.id)
+        val p = tasks[i].position
+        val li = lists.indexOfFirst { it.id == list.id }
+
+        when {
+            (e.diraction == up && i != 0) -> {
+                taskDao.update(tasks[i].copy(position = p - 1))
+                taskDao.update(tasks[i - 1].copy(position = p))
+            }
+            (e.diraction == down && i != tasks.lastIndex) -> {
+                taskDao.update(tasks[i].copy(position = p + 1))
+                taskDao.update(tasks[i + 1].copy(position = p))
+            }
+            (e.diraction == left && list.position != 0) -> {
+                taskDao.update(tasks[i].copy(taskListId = lists[li - 1].id))
+            }
+            (e.diraction == right && list.position != lists.lastIndex) -> {
+                taskDao.update(tasks[i].copy(taskListId = lists[li + 1].id))
+            }
         }
     }
 

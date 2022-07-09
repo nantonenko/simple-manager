@@ -12,7 +12,9 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
@@ -37,7 +39,10 @@ data class TaskState(
 
 private const val MAX_DESCRIPTION_LINES = 5 // characters
 
-private enum class TState { MAIN, MENU, RENAME, MOVE_MENU, POINTS_EDIT, EDIT, DELETE_CONFIRMATION }
+private enum class TState {
+    MAIN, MENU, RENAME, MOVE_MENU, POINTS_EDIT, EDIT,
+    DELETE_CONFIRMATION, MOVE_ARROWS
+}
 
 /**
  * Navigation
@@ -48,6 +53,7 @@ private enum class TState { MAIN, MENU, RENAME, MOVE_MENU, POINTS_EDIT, EDIT, DE
  * [DescriptionFull] fully opened description with all text visible
  * [DescriptionPartial] description with [MAX_DESCRIPTION_LINES] visible
  * [MoveMenu] menu with possible destination task lists
+ * [MoveArrows] menu with move arrow to move task up and down and between task lists
  */
 
 @Composable
@@ -87,6 +93,15 @@ fun Task(
         taskState = TState.MENU
     }
 
+    fun moveArrows() {
+        taskState = TState.MOVE_ARROWS
+    }
+
+    val up = TaskEvent.MoveWithArrows.Diractions.UP
+    val down = TaskEvent.MoveWithArrows.Diractions.DOWN
+    val left = TaskEvent.MoveWithArrows.Diractions.LEFT
+    val right = TaskEvent.MoveWithArrows.Diractions.RIGHT
+
     Card(
         modifier = modifier.animateContentSize(),
         shape = theme.shapes.round,
@@ -105,7 +120,8 @@ fun Task(
                         onOpenMenu = ::menu,
                         onEdit = ::edit,
                         onDelete = ::delete,
-                        onEditPoints = ::editPoints
+                        onEditPoints = ::editPoints,
+                        onMoveArrows = ::moveArrows
                     )
                 }
                 TState.MENU -> {
@@ -178,10 +194,20 @@ fun Task(
                         onCancel = ::back
                     )
                 }
+                TState.MOVE_ARROWS -> {
+                    MoveArrows(
+                        onBack = ::back,
+                        onUp = { handle(TaskEvent.MoveWithArrows(state.id, up)) },
+                        onDown = { handle(TaskEvent.MoveWithArrows(state.id, down)) },
+                        onRight = { handle(TaskEvent.MoveWithArrows(state.id, right)) },
+                        onLeft = { handle(TaskEvent.MoveWithArrows(state.id, left)) }
+                    )
+                }
             }
         }
     }
 }
+
 
 @Composable
 private fun MainState(
@@ -189,7 +215,8 @@ private fun MainState(
     onOpenMenu: () -> Unit = {},
     onEdit: () -> Unit,
     onEditPoints: () -> Unit = {},
-    onDelete: () -> Unit = {}
+    onDelete: () -> Unit = {},
+    onMoveArrows: () -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -214,6 +241,18 @@ private fun MainState(
             IconButton(onClick = onEdit) { Icon(Icons.Default.Edit, null) }
 
             IconButton(onClick = onOpenMenu) { Icon(Icons.Default.Menu, null) }
+
+            IconButton(onClick = onMoveArrows) {
+                Box {
+                    Icon(painterResource(id = R.drawable.ic_baseline_arrows_24), null)
+                    Icon(
+                        painterResource(id = R.drawable.ic_baseline_arrows_24),
+                        null,
+                        modifier = Modifier.rotate(90f)
+                    )
+                }
+            }
+
 
             OutlinedTransparentButton(
                 modifier = Modifier.align(Alignment.CenterVertically),
@@ -349,6 +388,63 @@ private fun MoveMenu(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun MoveArrows(
+    modifier: Modifier = Modifier,
+    onLeft: () -> Unit = {},
+    onRight: () -> Unit = {},
+    onUp: () -> Unit = {},
+    onDown: () -> Unit = {},
+    onBack: () -> Unit = {}
+) {
+    val btnMod = Modifier.fillMaxWidth()
+    Column(modifier) {
+        Row(modifier = Modifier.height(IntrinsicSize.Min)) {
+            Column(modifier = Modifier.weight(1f)) {
+                TransparentButton(onClick = onLeft, modifier = btnMod) {
+                    Icon(
+                        Icons.Default.ArrowBack,
+                        null
+                    )
+                }
+                Divider()
+                TransparentButton(onClick = onRight, modifier = btnMod) {
+                    Icon(
+                        Icons.Default.ArrowBack,
+                        null,
+                        modifier = Modifier.rotate(180f)
+                    )
+                }
+            }
+            Divider(
+                modifier
+                    .fillMaxHeight()
+                    .width(1.dp)
+                    .height(IntrinsicSize.Min)
+            )
+            Column(modifier = Modifier.weight(1f)) {
+                TransparentButton(onClick = onUp, modifier = btnMod) {
+                    Icon(
+                        Icons.Default.ArrowBack,
+                        null,
+                        modifier = Modifier.rotate(90f)
+                    )
+                }
+                Divider()
+                TransparentButton(onClick = onDown, modifier = btnMod) {
+                    Icon(
+                        Icons.Default.ArrowBack,
+                        null,
+                        modifier = Modifier.rotate(-90f)
+                    )
+                }
+            }
+        }
+        Divider()
+        BackButton(onClick = onBack)
     }
 }
 
