@@ -10,15 +10,15 @@ import com.hfad.simplemanager.ui.theme.elements.Elevation
 import com.hfad.simplemanager.ui.theme.elements.LocalElevation
 
 private val DarkColorPalette = darkColors(
-    primary = Purple200,
-    primaryVariant = Purple700,
-    secondary = Teal200
+    primary = Red900,
+    primaryVariant = RedLight900,
+    secondary = BlueGray100
 )
 
 private val LightColorPalette = lightColors(
-    primary = Purple500,
-    primaryVariant = Purple700,
-    secondary = Teal200
+    primary = Red900,
+    primaryVariant = RedDark900,
+    secondary = BlueGray100
 )
 
 @Composable
