@@ -2,6 +2,7 @@ package com.hfad.simplemanager.ui.TaskListScreen
 
 import androidx.compose.animation.*
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
@@ -254,11 +255,11 @@ private fun MainState(
             }
 
 
-            OutlinedTransparentButton(
+            IconButton(
                 modifier = Modifier.align(Alignment.CenterVertically),
                 onClick = onEditPoints
             ) {
-                Text(state.points.toString(), style = theme.typography.h5)
+                Text(state.points.toString(), style = theme.typography.h5.copy(color = theme.colors.primaryVariant))
             }
         }
         Spacer(modifier = Modifier.height(theme.spacing.medium))
