@@ -1,5 +1,6 @@
 package com.hfad.simplemanager.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.Icon
 import androidx.compose.material.Text

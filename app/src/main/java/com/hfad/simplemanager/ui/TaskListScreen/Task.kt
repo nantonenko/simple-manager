@@ -259,7 +259,7 @@ private fun MainState(
                 modifier = Modifier.align(Alignment.CenterVertically),
                 onClick = onEditPoints
             ) {
-                Text(state.points.toString(), style = theme.typography.h5.copy(color = theme.colors.primaryVariant))
+                Text(state.points.toString(), style = theme.typography.h5.copy(color = theme.colors.primary))
             }
         }
         Spacer(modifier = Modifier.height(theme.spacing.medium))

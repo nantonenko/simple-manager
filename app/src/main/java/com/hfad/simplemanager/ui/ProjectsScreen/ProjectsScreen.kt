@@ -57,7 +57,7 @@ fun ProjectScreen(vm: ProjectScreenVM = viewModel()) {
                 .fillMaxWidth()
                 .background(color = theme.colors.surface),
             onClick = vm::createNewProject,
-            color = theme.colors.primaryVariant.copy(alpha = 0.3f)
+            color = theme.colors.primary.copy(alpha = 0.3f)
         ) {
             Icon(Icons.Default.Add, null)
         }
@@ -114,7 +114,7 @@ private fun ProjectCard(
     var isEditMode by remember { mutableStateOf(false) }
     val cardBoarderColor by animateColorAsState(
         targetValue = if (isSelected) theme.colors.primary.copy(alpha = 0.6f)
-        else theme.colors.surface
+        else theme.colors.primaryVariant.copy(alpha = 0.4f)
     )
     val cardColor by animateColorAsState(
         targetValue = if (isSelected) theme.colors.primary.copy(alpha = 0.05f)

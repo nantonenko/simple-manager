@@ -12,6 +12,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import com.hfad.simplemanager.R
 import com.hfad.simplemanager.ui.TaskListScreen.TaskState
+import com.hfad.simplemanager.ui.theme.flat
 import com.hfad.simplemanager.ui.theme.spacing
 import com.hfad.simplemanager.ui.theme.theme
 
@@ -34,6 +35,7 @@ fun TaskEditMenu(
         TextField(
             modifier = fm,
             value = title,
+            shape = theme.shapes.flat,
             onValueChange = { title = it },
             singleLine = true,
             label = { Text(stringResource(R.string.header)) })
@@ -41,6 +43,7 @@ fun TaskEditMenu(
         TextField(
             modifier = fm,
             value = points,
+            shape = theme.shapes.flat,
             onValueChange = { points = it },
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -49,6 +52,7 @@ fun TaskEditMenu(
         TextField(
             modifier = fm,
             value = description,
+            shape = theme.shapes.flat,
             onValueChange = { description = it },
             label = { Text(stringResource(R.string.description)) })
 
