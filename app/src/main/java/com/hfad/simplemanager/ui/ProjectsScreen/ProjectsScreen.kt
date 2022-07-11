@@ -57,7 +57,7 @@ fun ProjectScreen(vm: ProjectScreenVM = viewModel()) {
                 .fillMaxWidth()
                 .background(color = theme.colors.surface),
             onClick = vm::createNewProject,
-            color = theme.colors.primary.copy(alpha = 0.3f)
+            color = theme.colors.primaryVariant.copy(alpha = 0.3f)
         ) {
             Icon(Icons.Default.Add, null)
         }

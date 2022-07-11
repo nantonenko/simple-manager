@@ -29,8 +29,7 @@ fun TaskEditMenu(
     val fm = Modifier.fillMaxWidth()
 
     Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(theme.spacing.large)
+        modifier = modifier
     ) {
         TextField(
             modifier = fm,

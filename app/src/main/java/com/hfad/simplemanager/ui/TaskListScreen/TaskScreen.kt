@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
+import com.google.accompanist.pager.rememberPagerState
 import com.hfad.simplemanager.R
 import com.hfad.simplemanager.ui.TaskScreenEvent
 import com.hfad.simplemanager.ui.components.ChangeValueMenu
@@ -46,6 +47,9 @@ fun TaskScreen(vm: TaskScreenVM = viewModel()) {
     val taskList by vm.taskFlow.collectAsState(listOf())
     val columnList by vm.taskListFlow.collectAsState(listOf())
     val selectedPrj by vm.selectedProjectFlow.collectAsState(initial = null)
+    var selectedTab by remember { mutableStateOf(0) }
+    val pagerState = rememberPagerState()
+    val scope = rememberCoroutineScope()
 
     val w = LocalConfiguration.current.screenWidthDp
 
@@ -60,31 +64,53 @@ fun TaskScreen(vm: TaskScreenVM = viewModel()) {
         return
     }
 
-    HorizontalPager(
-        count = columnList.size + 1,
-        key = { i -> if (columnList.isNotEmpty() && i != columnList.lastIndex + 1) columnList[i].id else Int.MAX_VALUE }
-    ) { page ->
-        if (page == columnList.lastIndex + 1) {
-            Box(modifier = Modifier.fillMaxSize()) {
-                NewTaskList(
-                    Modifier
-                        .width(w.dp)
-                        .align(Alignment.TopCenter)
-                ) {
-                    vm.handleEvent(
-                        TaskScreenEvent.NewTaskList(it)
-                    )
-                }
+    Column {
+        ScrollableTabRow(selectedTabIndex = pagerState.currentPage) {
+            columnList.forEachIndexed { index, taskListState ->
+                Tab(
+                    modifier = Modifier.height(48.dp),
+                    selected = index == pagerState.currentPage,
+                    onClick = {
+                        scope.launch { pagerState.animateScrollToPage(index) }
+                    }) { Text(taskListState.title) }
             }
-        } else {
-            TaskList(
-                modifier = Modifier.width(w.dp),
-                state = columnList[page],
-                tasks = taskList,
-                destinations = columnList,
-                taskEventHandler = { vm.handleEvent(it) },
-                handle = { vm.handleEvent(it) }
-            )
+            Tab(
+                modifier = Modifier.height(48.dp),
+                selected = pagerState.currentPage == columnList.lastIndex + 1,
+                onClick = {
+                    scope.launch { pagerState.animateScrollToPage(columnList.lastIndex + 1) }
+                }) {
+                Text(stringResource(R.string.new_task_list))
+            }
+        }
+
+        HorizontalPager(
+            state = pagerState,
+            count = columnList.size + 1,
+            key = { i -> if (columnList.isNotEmpty() && i != columnList.lastIndex + 1) columnList[i].id else Int.MAX_VALUE }
+        ) { page ->
+            if (page == columnList.lastIndex + 1) {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    NewTaskList(
+                        Modifier
+                            .width(w.dp)
+                            .align(Alignment.TopCenter)
+                    ) {
+                        vm.handleEvent(
+                            TaskScreenEvent.NewTaskList(it)
+                        )
+                    }
+                }
+            } else {
+                TaskList(
+                    modifier = Modifier.width(w.dp),
+                    state = columnList[page],
+                    tasks = taskList,
+                    destinations = columnList,
+                    taskEventHandler = { vm.handleEvent(it) },
+                    handle = { vm.handleEvent(it) }
+                )
+            }
         }
     }
 }
