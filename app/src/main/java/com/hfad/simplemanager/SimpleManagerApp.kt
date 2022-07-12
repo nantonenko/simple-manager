@@ -29,8 +29,8 @@ class SimpleManagerApp : Application() {
         taskScreenVM = TaskScreenVM(db)
         projectScreenVM = ProjectScreenVM(db.projectDao())
 
-        runBlocking(Dispatchers.IO) {
-            db.projectDao().deleteAll()
-        }
+//        runBlocking(Dispatchers.IO) {
+//            db.projectDao().deleteAll()
+//        }
     }
 }

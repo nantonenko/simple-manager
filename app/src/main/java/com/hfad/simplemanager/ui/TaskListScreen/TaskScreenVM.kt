@@ -1,6 +1,7 @@
 package com.hfad.simplemanager.ui.TaskListScreen
 
 import android.util.Log
+import androidx.compose.runtime.currentCompositionLocalContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hfad.simplemanager.dataBase.*
@@ -88,7 +89,7 @@ class TaskScreenVM(db: AppDatabase) : ViewModel() {
         taskListDao.insert(
             TaskListEntity(
                 projectId = projectDao.getSelectedProjectSync()!!.id,
-                title = e.title,
+                title = e.title.ifBlank { "task list ${lists.count() + 1}" },
                 position = nextPosition
             )
         )
@@ -148,11 +149,13 @@ class TaskScreenVM(db: AppDatabase) : ViewModel() {
     }
 
     private fun addNewTask(e: TaskListEvent.AddNewTask) = ioLaunch {
+        val taskNum = taskDao.getAllForListSync(e.id).count()
         taskDao.insert(
             TaskEntity(
                 taskListId = e.id,
+                position = taskNum,
                 projectId = projectDao.getSelectedProjectSync()!!.id,
-                title = e.title,
+                title = e.title.ifBlank { "task ${taskNum + 1}" },
                 description = e.description,
                 points = e.points
             )

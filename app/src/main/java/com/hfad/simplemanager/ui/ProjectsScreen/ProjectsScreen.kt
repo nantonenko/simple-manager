@@ -127,9 +127,11 @@ private fun ProjectCard(
         shape = theme.shapes.round,
         border = BorderStroke(2.dp, color = cardBoarderColor),
     ) {
-        Column(modifier = Modifier
-            .fillMaxWidth()
-            .background(color = cardColor)) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(color = cardColor)
+        ) {
             Swapper(
                 key = isEditMode,
                 isContinues = true,
@@ -151,7 +153,10 @@ private fun ProjectCard(
                         description = description,
                         onEditClicked = { isEditMode = true },
                         onProjectSelected = onProjectSelected,
-                        onProjectDeleted = onProjectDeleted
+                        onProjectDeleted = {
+                            isEditMode = false
+                            onProjectDeleted()
+                        }
                     )
                 }
             }
@@ -204,7 +209,10 @@ private fun ProjectCardMain(
                 }
                 Spacer(modifier = Modifier.height(theme.spacing.medium))
                 OutlinedTransparentButton(
-                    onClick = onProjectDeleted,
+                    onClick = {
+                        isDescriptionOpened = false
+                        onProjectDeleted()
+                    },
                     modifier = Modifier
                         .padding(horizontal = theme.spacing.corner)
                         .fillMaxWidth()

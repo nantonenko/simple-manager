@@ -47,7 +47,6 @@ fun TaskScreen(vm: TaskScreenVM = viewModel()) {
     val taskList by vm.taskFlow.collectAsState(listOf())
     val columnList by vm.taskListFlow.collectAsState(listOf())
     val selectedPrj by vm.selectedProjectFlow.collectAsState(initial = null)
-    var selectedTab by remember { mutableStateOf(0) }
     val pagerState = rememberPagerState()
     val scope = rememberCoroutineScope()
 

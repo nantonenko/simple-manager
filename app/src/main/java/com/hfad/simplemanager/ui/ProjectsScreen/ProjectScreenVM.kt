@@ -19,7 +19,8 @@ class ProjectScreenVM(private val projectDao: ProjectDao) : ViewModel() {
     val prjFlow: Flow<List<ProjectEntity>> get() = projectDao.getAll()
 
     fun createNewProject() = viewModelScope.launch(Dispatchers.IO) {
-        projectDao.insert(ProjectEntity(name = "new project"))
+        val prjNum = projectDao.getAllSync().count()
+        projectDao.insert(ProjectEntity(name = "new project ${prjNum + 1}"))
     }
 
     fun updateProject(project: ProjectEntity) = viewModelScope.launch(Dispatchers.IO) {
