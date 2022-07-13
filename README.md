@@ -9,40 +9,34 @@
 # GIF для презентации
 
 ## Создание проекта
-<img src="https://github.com/nantonenko/simple-manager/blob/master/gifs/project_convert_select.gif" width="25%" height="25%"/>
+<img src="https://github.com/nantonenko/simple-manager/blob/master/gifs/create-project.webm" width="25%" height="25%"/>
 
 ## Редактирование проекта
-<img src="https://github.com/nantonenko/simple-manager/blob/master/gifs/project_editing.gif" width="25%" height="25%"/>
+<img src="https://github.com/nantonenko/simple-manager/blob/master/gifs/edit-project.webm" width="25%" height="25%"/>
 
 ## Удаление проекта
-<img src="https://github.com/nantonenko/simple-manager/blob/master/gifs/project_delete.gif" width="25%" height="25%"/>
+<img src="https://github.com/nantonenko/simple-manager/blob/master/gifs/delete_project.webm" width="25%" height="25%"/>
 
 ## Создание списка задач
-<img src="https://github.com/nantonenko/simple-manager/blob/master/gifs/tasks_create_lists.gif" width="25%" height="25%"/>
+<img src="https://github.com/nantonenko/simple-manager/blob/master/gifs/create-task-list.webm" width="25%" height="25%"/>
 
-## Переименовывание списка задач
-<img src="https://github.com/nantonenko/simple-manager/blob/master/gifs/tasks_list_rename.gif" width="25%" height="25%"/>
+## Изменение позиции списка задач
+<img src="https://github.com/nantonenko/simple-manager/blob/master/gifs/move-task_list.webm" width="25%" height="25%"/>
+
+## Удаление списка задач
+<img src="https://github.com/nantonenko/simple-manager/blob/master/gifs/delete-task-list.webm" width="25%" height="25%"/>
 
 ## Создание задач
-<img src="https://github.com/nantonenko/simple-manager/blob/master/gifs/tasks_create_tasks.gif" width="25%" height="25%"/>
+<img src="https://github.com/nantonenko/simple-manager/blob/master/gifs/create_task.webm" width="25%" height="25%"/>
 
-## Редактирование задачи через главное меню карточки
-<img src="https://github.com/nantonenko/simple-manager/blob/master/gifs/tasks_task_editing.gif" width="25%" height="25%"/>
+## Редактирование задачи
+<img src="https://github.com/nantonenko/simple-manager/blob/master/gifs/edit-task.webm" width="25%" height="25%"/>
 
-## Редактирование задачи через иконку на карточке
-<img src="https://github.com/nantonenko/simple-manager/blob/master/gifs/tasks_editing_from_icon.gif" width="25%" height="25%"/>
+## Редактирование очков задачи
+<img src="https://github.com/nantonenko/simple-manager/blob/master/gifs/edit-task-points.webm" width="25%" height="25%"/>
 
-## Переименовывание задачи
-<img src="https://github.com/nantonenko/simple-manager/blob/master/gifs/tasks_task_rename.gif" width="25%" height="25%"/>
+## Изменение позиции задачи в списке
+<img src="https://github.com/nantonenko/simple-manager/blob/master/gifs/move-tasks-verti.webm" width="25%" height="25%"/>
 
-## Редактирование количества очков задачи
-<img src="https://github.com/nantonenko/simple-manager/blob/master/gifs/tasks_point_editing.gif" width="25%" height="25%"/>
-
-## Редактирование количества очков через главное меню карточки
-<img src="https://github.com/nantonenko/simple-manager/blob/master/gifs/tasks_point_editing_menu.gif" width="25%" height="25%"/>
-
-## Перемещение карточки
-<img src="https://github.com/nantonenko/simple-manager/blob/master/gifs/tasks_moving.gif" width="25%" height="25%"/>
-
-## Удаление карточки
-<img src="https://github.com/nantonenko/simple-manager/blob/master/gifs/tasks_deleting.gif" width="25%" height="25%"/>
+## Перемещение задачи между списками
+<img src="https://github.com/nantonenko/simple-manager/blob/master/gifs/move-tasks-horiz.webm" width="25%" height="25%"/>

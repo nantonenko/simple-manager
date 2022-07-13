@@ -63,8 +63,11 @@ fun TaskScreen(vm: TaskScreenVM = viewModel()) {
         return
     }
 
-    Column {
-        ScrollableTabRow(selectedTabIndex = pagerState.currentPage) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        ScrollableTabRow(
+            selectedTabIndex = pagerState.currentPage,
+            modifier = Modifier.fillMaxWidth()
+        ) {
             columnList.forEachIndexed { index, taskListState ->
                 Tab(
                     modifier = Modifier.height(48.dp),
