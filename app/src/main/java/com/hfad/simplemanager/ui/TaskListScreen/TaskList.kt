@@ -204,25 +204,24 @@ fun TaskList(
                         )
                     }
                 }
-            }
 
-
-            AnimatedVisibility(
-                visible = !isNewTaskNameEdit,
-                enter = expandVertically(tween(350, easing = LinearEasing)) { -it },
-                exit = shrinkVertically(tween(350, easing = LinearEasing)) { -it },
-                modifier = Modifier.align(Alignment.BottomCenter)
-            ) {
-                TransparentButton(
-                    onClick = { isNewTaskNameEdit = true },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(48.dp),
-                    color = theme.colors.surface
+                AnimatedVisibility(
+                    visible = !isNewTaskNameEdit,
+                    enter = expandVertically(tween(350, easing = LinearEasing)) { -it },
+                    exit = shrinkVertically(tween(350, easing = LinearEasing)) { -it }
                 ) {
-                    Icon(Icons.Default.Add, null)
+                    TransparentButton(
+                        onClick = { isNewTaskNameEdit = true },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp),
+                        color = theme.colors.surface
+                    ) {
+                        Icon(Icons.Default.Add, null)
+                    }
                 }
             }
+
         }
     }
 }
